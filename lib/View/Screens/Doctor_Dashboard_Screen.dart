@@ -1,4 +1,6 @@
 import 'package:ehosptal_flutter_revamp/View/Screens/Patient_List_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Widgets/Appointments_Section.dart';
+import 'package:ehosptal_flutter_revamp/View/Widgets/Tasks_Section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -75,31 +77,114 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     }
   }
 
+  // Widget _dashboardContent() {
+  //   return Column(
+  //     mainAxisSize: MainAxisSize.max,
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Container(
+  //         width: MediaQuery.of(context).size.width,
+  //         padding: const EdgeInsets.all(20),
+  //         decoration: BoxDecoration(
+  //           color: const Color(0xFF3F51B5),
+  //           borderRadius: BorderRadius.circular(12),
+  //         ),
+  //         child: Text(
+  //           "Hello Dr. ${widget.doctor["Fname"]}",
+  //           style: const TextStyle(
+  //               color: Colors.white,
+  //               fontSize: 20,
+  //               fontWeight: FontWeight.bold),
+  //         ),
+  //       ),
+  //       const SizedBox(height: 30),
+  //       const Text("Dashboard Content Here"),
+  //     ],
+  //   );
+  // }
+
   Widget _dashboardContent() {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: const Color(0xFF3F51B5),
-            borderRadius: BorderRadius.circular(12),
+  final isMobile = MediaQuery.of(context).size.width < 900;
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Breadcrumb row + top right actions (optional)
+      Row(
+        children: [
+          const Text(
+            "Doctor Portal  /  Dashboard",
+            style: TextStyle(color: Colors.black54),
           ),
-          child: Text(
-            "Hello Dr. ${widget.doctor["Fname"]}",
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold),
+          const Spacer(),
+          // Optional: AI Assistant + icons
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFB76BFF), Color(0xFF6B7CFF)],
+              ),
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                  color: Colors.black.withOpacity(0.10),
+                )
+              ],
+            ),
+            child: const Text(
+              "AI Assistant",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+            ),
           ),
+          const SizedBox(width: 14),
+          const Icon(Icons.notifications_none, color: Colors.black54),
+          const SizedBox(width: 10),
+          const Icon(Icons.person_outline, color: Colors.black54),
+        ],
+      ),
+
+      const SizedBox(height: 14),
+
+      // Blue banner
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E4ED8),
+          borderRadius: BorderRadius.circular(12),
         ),
-        const SizedBox(height: 30),
-        const Text("Dashboard Content Here"),
-      ],
-    );
-  }
+        child: Text(
+          "Hello, Doctor\nWish you a wonderful day at work.",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+        ),
+      ),
+
+      const SizedBox(height: 16),
+
+      // Main grid
+      Expanded(
+        child: isMobile
+            ? Column(
+                children: const [
+                  Expanded(child: AppointmentsSection()),
+                  SizedBox(height: 14),
+                  Expanded(child: TasksSection()),
+                ],
+              )
+            : Row(
+                children: const [
+                  Expanded(flex: 7, child: AppointmentsSection()),
+                  SizedBox(width: 14),
+                  Expanded(flex: 3, child: TasksSection()),
+                ],
+              ),
+      ),
+    ],
+  );
+}
+
 
   // ================= SIDEBAR =================
   Widget _buildSidebar(Color primary, {required bool isDrawer}) {
