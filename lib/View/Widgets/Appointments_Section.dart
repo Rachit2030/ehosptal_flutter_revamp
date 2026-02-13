@@ -518,52 +518,112 @@ class _DateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFE5E7EB),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: const Text(
-            "Today",
-            style: TextStyle(color: Colors.black54, fontSize: 12.5),
-          ),
-        ),
-        const SizedBox(width: 8),
+    return LayoutBuilder(
+      builder: (context, c) {
+        // available width inside this widget
+        final maxW = c.maxWidth;
+        // label gets whatever is left after chip + arrows
+        final labelW = (maxW - 140).clamp(90.0, 220.0);
 
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          onPressed: () {},
-          icon: const Icon(Icons.chevron_left),
-        ),
-        const SizedBox(width: 8),
-
-        SizedBox(
-          width: 190,
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            softWrap: false,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
-          ),
-        ),
-
-        const SizedBox(width: 8),
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          onPressed: () {},
-          icon: const Icon(Icons.chevron_right),
-        ),
-      ],
+        return Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E7EB),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Text(
+                "Today",
+                style: TextStyle(color: Colors.black54, fontSize: 12.5),
+              ),
+            ),
+            // 
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {},
+              icon: const Icon(Icons.chevron_left),
+            ),
+            // const SizedBox(width: 6),
+            SizedBox(
+              width: labelW,
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
+              ),
+            ),
+            // const SizedBox(width: 6),
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {},
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ],
+        );
+      },
     );
   }
 }
+
+
+// class _DateSelector extends StatelessWidget {
+//   final String label;
+//   const _DateSelector({required this.label});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       mainAxisSize: MainAxisSize.min,
+//       children: [
+//         Container(
+//           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+//           decoration: BoxDecoration(
+//             color: const Color(0xFFE5E7EB),
+//             borderRadius: BorderRadius.circular(999),
+//           ),
+//           child: const Text(
+//             "Today",
+//             style: TextStyle(color: Colors.black54, fontSize: 12.5),
+//           ),
+//         ),
+//         const SizedBox(width: 8),
+
+//         IconButton(
+//           padding: EdgeInsets.zero,
+//           constraints: const BoxConstraints(),
+//           onPressed: () {},
+//           icon: const Icon(Icons.chevron_left),
+//         ),
+//         const SizedBox(width: 8),
+
+//         SizedBox(
+//           width: 190,
+//           child: Text(
+//             label,
+//             maxLines: 1,
+//             overflow: TextOverflow.ellipsis,
+//             softWrap: false,
+//             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
+//           ),
+//         ),
+
+//         const SizedBox(width: 8),
+//         IconButton(
+//           padding: EdgeInsets.zero,
+//           constraints: const BoxConstraints(),
+//           onPressed: () {},
+//           icon: const Icon(Icons.chevron_right),
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 class _Table extends StatelessWidget {
   final List<Map<String, dynamic>> items;

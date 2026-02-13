@@ -54,11 +54,11 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                 ),
 
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: _buildContent(),
-                ),
-              ),
+  child: SingleChildScrollView(
+    padding: const EdgeInsets.all(24),
+    child: _buildContent(), // dashboard will now scroll
+  ),
+),
             ],
           ),
         );
@@ -77,47 +77,24 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     }
   }
 
-  // Widget _dashboardContent() {
-  //   return Column(
-  //     mainAxisSize: MainAxisSize.max,
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Container(
-  //         width: MediaQuery.of(context).size.width,
-  //         padding: const EdgeInsets.all(20),
-  //         decoration: BoxDecoration(
-  //           color: const Color(0xFF3F51B5),
-  //           borderRadius: BorderRadius.circular(12),
-  //         ),
-  //         child: Text(
-  //           "Hello Dr. ${widget.doctor["Fname"]}",
-  //           style: const TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 20,
-  //               fontWeight: FontWeight.bold),
-  //         ),
-  //       ),
-  //       const SizedBox(height: 30),
-  //       const Text("Dashboard Content Here"),
-  //     ],
-  //   );
-  // }
-
-  Widget _dashboardContent() {
+ Widget _dashboardContent() {
   final isMobile = MediaQuery.of(context).size.width < 900;
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      // Breadcrumb row + top right actions (optional)
+      // Top row
       Row(
         children: [
-          const Text(
-            "Doctor Portal  /  Dashboard",
-            style: TextStyle(color: Colors.black54),
+          const Expanded(
+            child: Text(
+              "Doctor Portal  /  Dashboard",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.black54),
+            ),
           ),
-          const Spacer(),
-          // Optional: AI Assistant + icons
+          const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
@@ -125,13 +102,6 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                 colors: [Color(0xFFB76BFF), Color(0xFF6B7CFF)],
               ),
               borderRadius: BorderRadius.circular(999),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                  color: Colors.black.withOpacity(0.10),
-                )
-              ],
             ),
             child: const Text(
               "AI Assistant",
@@ -147,7 +117,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
       const SizedBox(height: 14),
 
-      // Blue banner
+      // Banner
       Container(
         width: double.infinity,
         padding: const EdgeInsets.all(18),
@@ -155,35 +125,41 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
           color: const Color(0xFF1E4ED8),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
+        child: const Text(
           "Hello, Doctor\nWish you a wonderful day at work.",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
         ),
       ),
 
       const SizedBox(height: 16),
 
-      // Main grid
-      Expanded(
-        child: isMobile
-            ? Column(
-                children: const [
-                  Expanded(child: AppointmentsSection()),
-                  SizedBox(height: 14),
-                  Expanded(child: TasksSection()),
-                ],
-              )
-            : Row(
-                children: const [
-                  Expanded(flex: 7, child: AppointmentsSection()),
-                  SizedBox(width: 14),
-                  Expanded(flex: 3, child: TasksSection()),
-                ],
-              ),
-      ),
+      // ✅ Fixed heights so Appointments/Tasks can safely use Expanded internally
+      if (isMobile) ...[
+        const SizedBox(height: 560, child: AppointmentsSection()),
+        const SizedBox(height: 14),
+        const SizedBox(height: 720, child: TasksSection()),
+      ] else ...[
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Expanded(
+              flex: 7,
+              child: SizedBox(height: 680, child: AppointmentsSection()),
+            ),
+            SizedBox(width: 14),
+            Expanded(
+              flex: 3,
+              child: SizedBox(height: 680, child: TasksSection()),
+            ),
+          ],
+        ),
+      ],
+
+      const SizedBox(height: 24),
     ],
   );
 }
+
 
 
   // ================= SIDEBAR =================
