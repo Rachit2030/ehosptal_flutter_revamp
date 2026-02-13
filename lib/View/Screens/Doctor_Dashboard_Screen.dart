@@ -1,5 +1,6 @@
 import 'package:ehosptal_flutter_revamp/View/Screens/Patient_List_Screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -106,14 +107,13 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
       child: Column(
         children: [
           const SizedBox(height: 20),
-          const Text(
-            "eHospital",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF3F51B5),
-            ),
-          ),
+           Center(
+  child: SvgPicture.asset(
+    "assets/ehospital_logo.svg",
+    height: 34,
+    fit: BoxFit.contain,
+  ),
+),
           const SizedBox(height: 30),
 
           _menuItem(Icons.dashboard, "Dashboard", 0),
