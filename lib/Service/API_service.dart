@@ -27,10 +27,6 @@ class ApiService {
         )
         .timeout(const Duration(seconds: 20));
 
-    // Helpful debug
-    // print("Status: ${response.statusCode}");
-    // print("Body: ${response.body}");
-
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     }

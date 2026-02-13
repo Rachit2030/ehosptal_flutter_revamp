@@ -1,4 +1,5 @@
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -29,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void onLogin() async {
+  Future<void> onLogin() async {
   FocusScope.of(context).unfocus();
 
   if (!_formKey.currentState!.validate()) return;
@@ -42,36 +43,28 @@ class _LoginScreenState extends State<LoginScreen> {
     final res = await api.login(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
-      selectedOption: selectedRole, // Doctor / Patient
+      selectedOption: selectedRole, // "Doctor" or "Patient"
     );
 
     if (!mounted) return;
     setState(() => isLoading = false);
 
-    // Optional: if your API returns token/user, you can read it like:
-    // final token = res["token"];
-    // final user = res["user"];
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("✅ Login successful")),
+    // Navigate after successful login
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DoctorDashboardScreen(doctor: res),
+      ),
     );
-
-    // TODO: Navigate to home screen
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-
-    debugPrint("Login response: $res");
   } catch (e) {
     if (!mounted) return;
     setState(() => isLoading = false);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("❌ Login failed: $e")),
+      SnackBar(content: Text("Login failed: $e")),
     );
-
-    debugPrint("Login error: $e");
   }
 }
-
 
   @override
   Widget build(BuildContext context) {
