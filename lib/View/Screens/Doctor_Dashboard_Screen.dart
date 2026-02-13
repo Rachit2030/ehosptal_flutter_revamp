@@ -77,16 +77,18 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
   Widget _dashboardContent() {
     return Column(
+      mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
+          width: MediaQuery.of(context).size.width,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: const Color(0xFF3F51B5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            "Hello Dr. ${widget.doctor["Fname"]},",
+            "Hello Dr. ${widget.doctor["Fname"]}",
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -103,15 +105,15 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   Widget _buildSidebar(Color primary, {required bool isDrawer}) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
           const SizedBox(height: 20),
            Center(
   child: SvgPicture.asset(
     "assets/ehospital_logo.svg",
-    height: 34,
-    fit: BoxFit.contain,
+    height: 54,
+    fit: BoxFit.fill,
   ),
 ),
           const SizedBox(height: 30),
