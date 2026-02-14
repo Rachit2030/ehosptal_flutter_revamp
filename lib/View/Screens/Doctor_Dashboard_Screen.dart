@@ -73,7 +73,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   // ================= CONTENT SWITCHER =================
   Widget _buildContent() {
     if (selectedIndex == 0) {
-      return _dashboardContent();
+      return _dashboardContent(isMobile: true);
     } else if (selectedIndex == 1) {
   return PatientListScreen(
     doctorId: widget.doctor["id"],
