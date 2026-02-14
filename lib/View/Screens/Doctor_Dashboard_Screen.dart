@@ -69,8 +69,11 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     if (selectedIndex == 0) {
       return _dashboardContent();
     } else if (selectedIndex == 1) {
-      return const PatientListScreen(); // 👈 use your patient screen here
-    } else {
+  return PatientListScreen(
+    doctorId: widget.doctor["id"],
+    embedded: true,
+  );
+} else {
       return const Center(child: Text("Coming Soon"));
     }
   }
