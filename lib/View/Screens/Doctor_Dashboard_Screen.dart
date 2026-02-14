@@ -72,10 +72,16 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
   // ================= CONTENT SWITCHER =================
   Widget _buildContent() {
-    if (selectedIndex == 1) {
-      return const PatientListScreen();
+    if (selectedIndex == 0) {
+      return _dashboardContent(isMobile: true);
+    } else if (selectedIndex == 1) {
+  return PatientListScreen(
+    doctorId: widget.doctor["id"],
+    embedded: true,
+  );
+} else {
+      return const Center(child: Text("Coming Soon"));
     }
-    return const Center(child: Text("Coming Soon"));
   }
 
   Widget _dashboardContent({required bool isMobile}) {
