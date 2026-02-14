@@ -33,4 +33,44 @@ class ApiService {
 
     throw Exception("Login failed: ${response.statusCode} - ${response.body}");
   }
+
+  Future<List<Map<String, dynamic>>> getDoctorCalendar({
+  required Map<String, dynamic> loginData,
+  required DateTime start,
+  required DateTime end,
+}) async {
+  print(start);
+  final url = Uri.parse("$baseUrl/api/appointments/doctorGetCalendar");
+
+  final payload = {
+    "loginData": loginData,
+    "start": start.toUtc().toIso8601String(),
+    "end": end.toUtc().toIso8601String(),
+  };
+
+  final res = await http.post(
+    url,
+    headers: const {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+    body: jsonEncode(payload),
+  );
+
+  if (res.statusCode < 200 || res.statusCode >= 300) {
+    throw Exception("doctorGetCalendar failed: ${res.statusCode} ${res.body}");
+  }
+
+  final decoded = jsonDecode(res.body);
+  print(decoded.toString());
+  if (decoded is Map<String, dynamic>) {
+    final result = decoded["result"];
+    if (result is List) {
+      return result.cast<Map<String, dynamic>>();
+    }
+    throw Exception("Unexpected response: missing 'result' list");
+  }
+
+  throw Exception("Unexpected response format");
+}
 }
