@@ -1,8 +1,10 @@
 import 'package:ehosptal_flutter_revamp/View/Screens/Patient_List_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Widgets/Appointments_Section.dart';
 import 'package:ehosptal_flutter_revamp/View/Widgets/Tasks_Section.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Calendar_Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Billing_Screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -75,11 +77,15 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     if (selectedIndex == 0) {
       return _dashboardContent(isMobile: true);
     } else if (selectedIndex == 1) {
-  return PatientListScreen(
-    doctorId: widget.doctor["id"],
-    embedded: true,
-  );
-} else {
+      return PatientListScreen(    
+        doctorId: widget.doctor["id"],
+        embedded: true,
+      );
+    } else if (selectedIndex == 2) {
+      return CalendarScreen(doctorId: widget.doctor['id'].toString());
+    } else if (selectedIndex == 3) {
+      return BillingScreen(doctorId: widget.doctor['id'].toString());
+    } else {
       return const Center(child: Text("Coming Soon"));
     }
   }
@@ -191,7 +197,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
           _menuItem(Icons.dashboard, "Dashboard", 0, isDrawer),
           _menuItem(Icons.people, "Patients", 1, isDrawer),
           _menuItem(Icons.calendar_today, "Calendar", 2, isDrawer),
-          _menuItem(Icons.message, "Messages", 3, isDrawer),
+          _menuItem(Icons.receipt_long, "Billing", 3, isDrawer),
+          _menuItem(Icons.message, "Messages", 4, isDrawer),
 
           const Spacer(),
 
@@ -202,7 +209,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             },
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),
-          )
+          ),
         ],
       ),
     );
