@@ -319,9 +319,9 @@ class _PatientListScreenState extends State<PatientListScreen> {
     if (_loading) return const Center(child: CircularProgressIndicator());
 
     if (_error != null) {
-      return Center(
+      return Expanded(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
             const Icon(Icons.error_outline, size: 32, color: Colors.redAccent),
             const SizedBox(height: 10),
@@ -359,83 +359,97 @@ class _PatientListScreenState extends State<PatientListScreen> {
       data: Theme.of(context).copyWith(
         dividerColor: const Color(0xFFE5E7EB),
       ),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: DataTable(
-          showCheckboxColumn: true,
-          dividerThickness: 1,
-          headingRowHeight: 56,
-          dataRowMinHeight: 64,
-          dataRowMaxHeight: 72,
-          horizontalMargin: 12,
-          columnSpacing: 38,
-          headingTextStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF111827),
-          ),
-          dataTextStyle: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF111827),
-          ),
-          border: const TableBorder(
-            horizontalInside: BorderSide(color: Color(0xFFE5E7EB), width: 1),
-            bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
-          ),
-          columns: const [
-            DataColumn(label: Text("Name")),
-            DataColumn(label: Text("Age")),
-            DataColumn(label: Text("Gender")),
-            DataColumn(label: Text("Status")),
-            DataColumn(label: Text("Last Appointment")),
-            DataColumn(label: Text("Last Diagnosis")),
-          ],
-          rows: rows.map((p) {
-            return DataRow(
-              // keep selection default behavior from DataTable (checkboxes)
-              cells: [
-                DataCell(
-                  InkWell(
-                    onTap: () => _openPatientProfile(p),
-                    child: Text(
-                      p.fullName,
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w700,
-                        decoration: TextDecoration.underline,
+      child: LayoutBuilder(
+  builder: (context, constraints) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minWidth: constraints.maxWidth),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: DataTable(
+            showCheckboxColumn: true,
+            dividerThickness: 1,
+            headingRowHeight: 56,
+            dataRowMinHeight: 64,
+            dataRowMaxHeight: 72,
+            horizontalMargin: 12,
+            columnSpacing: constraints.maxWidth / 15, // 👈 dynamic spacing
+            headingTextStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF111827),
+            ),
+            dataTextStyle: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF111827),
+            ),
+            border: const TableBorder(
+              horizontalInside:
+                  BorderSide(color: Color(0xFFE5E7EB), width: 1),
+              bottom:
+                  BorderSide(color: Color(0xFFE5E7EB), width: 1),
+            ),
+            columns: const [
+              DataColumn(label: Text("Name")),
+              DataColumn(label: Text("Age")),
+              DataColumn(label: Text("Gender")),
+              DataColumn(label: Text("Status")),
+              DataColumn(label: Text("Last Appointment")),
+              DataColumn(label: Text("Last Diagnosis")),
+            ],
+            rows: rows.map((p) {
+              return DataRow(
+                cells: [
+                  DataCell(
+                    InkWell(
+                      onTap: () => _openPatientProfile(p),
+                      child: Text(
+                        p.fullName,
+                        style: TextStyle(
+                          color: primary,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                DataCell(Text(p.age?.toString() ?? "-")),
-                DataCell(Text(p.gender.isEmpty ? "-" : p.gender)),
-                DataCell(
-                  _StatusPillDropdown(
-                    value: (p.status.isEmpty) ? "Active" : p.status,
-                    onChanged: (newStatus) {
-                      setState(() {
-                        final idx =
-                            _allPatients.indexWhere((x) => x.id == p.id);
-                        if (idx != -1) {
-                          _allPatients[idx] =
-                              _allPatients[idx].copyWith(status: newStatus);
-                        }
-                        final fidx = _filtered.indexWhere((x) => x.id == p.id);
-                        if (fidx != -1) {
-                          _filtered[fidx] =
-                              _filtered[fidx].copyWith(status: newStatus);
-                        }
-                      });
-                    },
+                  DataCell(Text(p.age?.toString() ?? "-")),
+                  DataCell(Text(p.gender.isEmpty ? "-" : p.gender)),
+                  DataCell(
+                    _StatusPillDropdown(
+                      value: (p.status.isEmpty) ? "Active" : p.status,
+                      onChanged: (newStatus) {
+                        setState(() {
+                          final idx =
+                              _allPatients.indexWhere((x) => x.id == p.id);
+                          if (idx != -1) {
+                            _allPatients[idx] =
+                                _allPatients[idx].copyWith(status: newStatus);
+                          }
+                          final fidx =
+                              _filtered.indexWhere((x) => x.id == p.id);
+                          if (fidx != -1) {
+                            _filtered[fidx] =
+                                _filtered[fidx].copyWith(status: newStatus);
+                          }
+                        });
+                      },
+                    ),
                   ),
-                ),
-                DataCell(Text(_fmtDate(p.lastAppointment))),
-                DataCell(Text(p.lastDiagnosis.isEmpty ? "-" : p.lastDiagnosis)),
-              ],
-            );
-          }).toList(),
+                  DataCell(Text(_fmtDate(p.lastAppointment))),
+                  DataCell(Text(
+                      p.lastDiagnosis.isEmpty ? "-" : p.lastDiagnosis)),
+                ],
+              );
+            }).toList(),
+          ),
         ),
       ),
+    );
+  },
+),
+
     );
   }
 
