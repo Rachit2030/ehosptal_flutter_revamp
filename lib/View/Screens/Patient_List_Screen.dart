@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:ehosptal_flutter_revamp/model/patient.dart';
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
+import 'PatientProfileScreen.dart';
 
 // If your package import ever fails (pubspec name mismatch), use these instead:
 // import '../../model/patient.dart';
@@ -495,67 +496,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
   }
 }
 
-// ------------------- Profile page (no popup dialog anymore) -------------------
-
-class PatientProfileScreen extends StatelessWidget {
-  final Patient patient;
-  const PatientProfileScreen({super.key, required this.patient});
-
-  String fmtDate(DateTime? dt) {
-    if (dt == null) return "-";
-    final y = dt.year.toString().padLeft(4, '0');
-    final m = dt.month.toString().padLeft(2, '0');
-    final d = dt.day.toString().padLeft(2, '0');
-    return "$y-$m-$d";
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const primary = Color(0xFF3F51B5);
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
-      appBar: AppBar(
-        title: Text(patient.fullName),
-        backgroundColor: Colors.white,
-        foregroundColor: primary,
-        elevation: 0,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  patient.fullName,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 16),
-                Text("Patient ID: ${patient.id}"),
-                const SizedBox(height: 8),
-                Text("Gender: ${patient.gender.isEmpty ? "-" : patient.gender}"),
-                const SizedBox(height: 8),
-                Text("Age: ${patient.age?.toString() ?? "-"}"),
-                const SizedBox(height: 8),
-                Text("Status: ${patient.status.isEmpty ? "Active" : patient.status}"),
-                const SizedBox(height: 8),
-                Text("Last Appointment: ${fmtDate(patient.lastAppointment)}"),
-                const SizedBox(height: 8),
-                Text("Last Diagnosis: ${patient.lastDiagnosis.isEmpty ? "-" : patient.lastDiagnosis}"),
-                const SizedBox(height: 8),
-                Text("Phone: ${patient.phone.isEmpty ? "-" : patient.phone}"),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // ------------------- Small UI widgets -------------------
 
