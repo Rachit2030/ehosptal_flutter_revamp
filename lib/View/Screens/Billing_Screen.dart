@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:intl/intl.dart';
 
 class BillingScreen extends StatefulWidget {
   final String doctorId;
-
   const BillingScreen({super.key, required this.doctorId});
 
   @override
@@ -16,8 +16,15 @@ class _BillingScreenState extends State<BillingScreen> {
   int selectedTab = 1; // 0 = New Bill, 1 = Bills
   List<Bill> bills = [];
   bool isLoading = true;
+
+  // Pagination for desktop table
   int rowsPerPage = 10;
   int currentPage = 0;
+
+  bool get _isWide => MediaQuery.of(context).size.width >= 900;
+  bool get _isCompact => MediaQuery.of(context).size.width < 700;
+
+  double get _pagePadding => _isCompact ? 12 : 24;
 
   @override
   void initState() {
@@ -31,10 +38,11 @@ class _BillingScreenState extends State<BillingScreen> {
       final String response = await rootBundle.loadString('assets/data/bills.json');
       final List<dynamic> data = json.decode(response);
       setState(() {
-        bills = data.map((json) => Bill.fromJson(json)).toList();
+        bills = data.map((e) => Bill.fromJson(e)).toList();
         isLoading = false;
       });
     } catch (e) {
+      // ignore: avoid_print
       print('Error loading bills: $e');
       setState(() => isLoading = false);
     }
@@ -44,118 +52,163 @@ class _BillingScreenState extends State<BillingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              const Text(
-                "Billing Management",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A1A),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Tab Buttons
-              Row(
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(_pagePadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _buildTabButton(
-                      icon: Icons.receipt_long,
-                      label: "New Bill",
-                      isSelected: selectedTab == 0,
-                      onTap: () => setState(() => selectedTab = 0),
+                  const Text(
+                    "Billing Management",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF111827),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTabButton(
-                      icon: Icons.medical_information,
-                      label: "Bills",
-                      isSelected: selectedTab == 1,
-                      onTap: () => setState(() => selectedTab = 1),
-                    ),
+                  const SizedBox(height: 18),
+
+                  _TabsRow(
+                    isCompact: _isCompact,
+                    selected: selectedTab,
+                    onSelect: (i) => setState(() => selectedTab = i),
                   ),
+                  const SizedBox(height: 18),
+
+                  if (selectedTab == 0)
+                    NewBillForm(doctorId: widget.doctorId)
+                  else
+                    BillsListView(
+                      bills: bills,
+                      isLoading: isLoading,
+                      wide: _isWide,
+                      rowsPerPage: rowsPerPage,
+                      currentPage: currentPage,
+                      onRowsPerPageChanged: (v) {
+                        setState(() {
+                          rowsPerPage = v;
+                          currentPage = 0;
+                        });
+                      },
+                      onPageChanged: (p) => setState(() => currentPage = p),
+                    ),
                 ],
               ),
-              const SizedBox(height: 24),
-
-              // Content
-              if (selectedTab == 0)
-                NewBillForm(doctorId: widget.doctorId)
-              else
-                BillsListView(
-                  bills: bills,
-                  isLoading: isLoading,
-                  rowsPerPage: rowsPerPage,
-                  currentPage: currentPage,
-                  onRowsPerPageChanged: (value) {
-                    setState(() {
-                      rowsPerPage = value!;
-                      currentPage = 0;
-                    });
-                  },
-                  onPageChanged: (page) {
-                    setState(() => currentPage = page);
-                  },
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabButton({
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF3F51B5) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF3F51B5) : Colors.grey[300]!,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : const Color(0xFF3F51B5),
-              size: 20,
             ),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : const Color(0xFF3F51B5),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-// New Bill Form Widget
+class _TabsRow extends StatelessWidget {
+  final bool isCompact;
+  final int selected;
+  final ValueChanged<int> onSelect;
+
+  const _TabsRow({
+    required this.isCompact,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget button({
+      required IconData icon,
+      required String label,
+      required bool active,
+      required VoidCallback onTap,
+    }) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          decoration: BoxDecoration(
+            color: active ? const Color(0xFF3F51B5) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: active ? const Color(0xFF3F51B5) : const Color(0xFFE5E7EB)),
+            boxShadow: [
+              if (!active)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: active ? Colors.white : const Color(0xFF3F51B5)),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: active ? Colors.white : const Color(0xFF3F51B5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (isCompact) {
+      return Column(
+        children: [
+          button(
+            icon: Icons.receipt_long,
+            label: "New Bill",
+            active: selected == 0,
+            onTap: () => onSelect(0),
+          ),
+          const SizedBox(height: 12),
+          button(
+            icon: Icons.medical_information,
+            label: "Bills",
+            active: selected == 1,
+            onTap: () => onSelect(1),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: button(
+            icon: Icons.receipt_long,
+            label: "New Bill",
+            active: selected == 0,
+            onTap: () => onSelect(0),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: button(
+            icon: Icons.medical_information,
+            label: "Bills",
+            active: selected == 1,
+            onTap: () => onSelect(1),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// -------------------- New Bill Form --------------------
+
 class NewBillForm extends StatefulWidget {
   final String doctorId;
-
   const NewBillForm({super.key, required this.doctorId});
 
   @override
@@ -164,31 +217,24 @@ class NewBillForm extends StatefulWidget {
 
 class _NewBillFormState extends State<NewBillForm> {
   final _formKey = GlobalKey<FormState>();
+
   String billType = 'OHIP';
-  final _patientNameController = TextEditingController();
   DateTime selectedDate = DateTime.now();
+
+  final _patientNameController = TextEditingController();
   final _ohipNumberController = TextEditingController();
   final _serviceCodeController = TextEditingController();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+
   String? selectedService;
-  List<BillItem> billItems = [];
+  final List<BillItem> billItems = [];
+
+  bool get _isCompact => MediaQuery.of(context).size.width < 700;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(24),
+    return _CardShell(
       child: Form(
         key: _formKey,
         child: Column(
@@ -196,52 +242,41 @@ class _NewBillFormState extends State<NewBillForm> {
           children: [
             const Text(
               "Create New Bill",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF3F51B5),
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF3F51B5)),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
 
-            // Bill Type
-            const Text("Bill Type", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const Text("Bill Type", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Row(
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Radio<String>(
-                  value: 'OHIP',
-                  groupValue: billType,
-                  onChanged: (value) => setState(() => billType = value!),
+                _RadioChip(
+                  label: "OHIP",
+                  selected: billType == "OHIP",
+                  onTap: () => setState(() => billType = "OHIP"),
                 ),
-                const Text('OHIP'),
-                const SizedBox(width: 24),
-                Radio<String>(
-                  value: 'Private',
-                  groupValue: billType,
-                  onChanged: (value) => setState(() => billType = value!),
+                _RadioChip(
+                  label: "Private",
+                  selected: billType == "Private",
+                  onTap: () => setState(() => billType = "Private"),
                 ),
-                const Text('Private'),
               ],
             ),
-            const SizedBox(height: 20),
 
-            // Patient Name
-            const Text("Patient Name", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 18),
+            _label("Patient Name*"),
             const SizedBox(height: 8),
             TextFormField(
               controller: _patientNameController,
-              decoration: InputDecoration(
-                hintText: "Enter patient name",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+              decoration: _inputDecoration("Enter patient name"),
+              validator: (v) => (v == null || v.trim().isEmpty) ? "Required" : null,
             ),
-            const SizedBox(height: 20),
 
-            // Date
-            const Text("Date", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 18),
+            _label("Date"),
             const SizedBox(height: 8),
             InkWell(
               onTap: () async {
@@ -253,213 +288,100 @@ class _NewBillFormState extends State<NewBillForm> {
                 );
                 if (date != null) setState(() => selectedDate = date);
               },
+              borderRadius: BorderRadius.circular(10),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(DateFormat('yyyy-MM-dd').format(selectedDate)),
-                    const Icon(Icons.calendar_today, size: 20),
+                    Expanded(child: Text(DateFormat('yyyy-MM-dd').format(selectedDate))),
+                    const Icon(Icons.calendar_today, size: 18, color: Color(0xFF6B7280)),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
 
-            // OHIP Billing Information
+            const SizedBox(height: 22),
             const Text(
               "OHIP Billing Information",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF3F51B5),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF3F51B5)),
+            ),
+            const SizedBox(height: 14),
+
+            // Responsive fields
+            if (_isCompact) ...[
+              _ohipNumberField(),
+              const SizedBox(height: 14),
+              _serviceDropdown(),
+              const SizedBox(height: 14),
+              _serviceCodeField(),
+              const SizedBox(height: 14),
+              _amountField(),
+            ] else ...[
+              Row(
+                children: [
+                  Expanded(child: _ohipNumberField()),
+                  const SizedBox(width: 16),
+                  Expanded(child: _serviceDropdown()),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(child: _serviceCodeField()),
+                  const SizedBox(width: 16),
+                  Expanded(child: _amountField()),
+                ],
+              ),
+            ],
 
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("OHIP Number*", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _ohipNumberController,
-                        decoration: InputDecoration(
-                          hintText: "Enter OHIP number",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Service*", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          hintText: "Search or select service",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        items: ['Consultation', 'Surgery', 'Lab Test', 'X-Ray', 'Vaccination']
-                            .map((service) => DropdownMenuItem(value: service, child: Text(service)))
-                            .toList(),
-                        onChanged: (value) => setState(() => selectedService = value),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Service Code", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _serviceCodeController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Amount", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _amountController,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Amount is automatically set based on service",
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Note
-            const Text("Note", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 18),
+            _label("Note"),
             const SizedBox(height: 8),
             TextFormField(
               controller: _noteController,
               maxLines: 3,
-              decoration: InputDecoration(
-                hintText: "Enter note (optional)",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: _inputDecoration("Enter note (optional)"),
+            ),
+
+            const SizedBox(height: 18),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton(
+                onPressed: _addBillItem,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3F51B5),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text("ADD OHIP ITEM"),
               ),
             ),
-            const SizedBox(height: 20),
 
-            // Add OHIP Item Button
-            ElevatedButton(
-              onPressed: _addBillItem,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3F51B5),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text("ADD OHIP ITEM"),
+            const SizedBox(height: 18),
+            const Text("Bill Preview", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 12),
+
+            // Preview table that NEVER overflows
+            _PreviewTable(
+              items: billItems,
+              onRemove: (it) => setState(() => billItems.remove(it)),
+              total: _calculateTotal(),
             ),
-            const SizedBox(height: 24),
 
-            // Bill Preview
-            const Text(
-              "Bill Preview",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                    ),
-                    child: const Row(
-                      children: [
-                        Expanded(child: Text("Code", style: TextStyle(fontWeight: FontWeight.bold))),
-                        Expanded(child: Text("Description", style: TextStyle(fontWeight: FontWeight.bold))),
-                        Expanded(child: Text("Unit Price", style: TextStyle(fontWeight: FontWeight.bold))),
-                        Expanded(child: Text("Unit", style: TextStyle(fontWeight: FontWeight.bold))),
-                        Expanded(child: Text("Actions", style: TextStyle(fontWeight: FontWeight.bold))),
-                      ],
-                    ),
-                  ),
-                  if (billItems.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Text("No items added yet", style: TextStyle(color: Colors.grey)),
-                    )
-                  else
-                    ...billItems.map((item) => _buildBillItemRow(item)).toList(),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Text("Total Amount:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const SizedBox(width: 16),
-                        Text(
-                          "\$${_calculateTotal().toStringAsFixed(2)}",
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF3F51B5)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Submit Button
+            const SizedBox(height: 18),
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: _submitBill,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3F51B5),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: const Text("Submit Bill", style: TextStyle(fontSize: 16)),
@@ -471,71 +393,133 @@ class _NewBillFormState extends State<NewBillForm> {
     );
   }
 
-  Widget _buildBillItemRow(BillItem item) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-      ),
-      child: Row(
-        children: [
-          Expanded(child: Text(item.code)),
-          Expanded(child: Text(item.description)),
-          Expanded(child: Text("\$${item.unitPrice.toStringAsFixed(2)}")),
-          Expanded(child: Text(item.unit.toString())),
-          Expanded(
-            child: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                setState(() {
-                  billItems.remove(item);
-                });
-              },
-            ),
-          ),
-        ],
-      ),
+  Widget _ohipNumberField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label("OHIP Number*"),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _ohipNumberController,
+          decoration: _inputDecoration("Enter OHIP number"),
+        ),
+      ],
     );
   }
 
-  void _addBillItem() {
-    if (_serviceCodeController.text.isNotEmpty && _amountController.text.isNotEmpty) {
-      setState(() {
-        billItems.add(BillItem(
-          code: _serviceCodeController.text,
-          description: selectedService ?? 'Service',
-          unitPrice: double.tryParse(_amountController.text) ?? 0,
-          unit: 1,
-        ));
-        _serviceCodeController.clear();
-        _amountController.clear();
-        selectedService = null;
-      });
-    }
+  Widget _serviceDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label("Service*"),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: selectedService,
+          isExpanded: true,
+          decoration: _inputDecoration("Search or select service"),
+          items: const ['Consultation', 'Surgery', 'Lab Test', 'X-Ray', 'Vaccination']
+              .map((s) => DropdownMenuItem(value: s, child: Text(s, overflow: TextOverflow.ellipsis)))
+              .toList(),
+          onChanged: (v) => setState(() => selectedService = v),
+        ),
+      ],
+    );
   }
 
-  double _calculateTotal() {
-    return billItems.fold(0, (sum, item) => sum + (item.unitPrice * item.unit));
+  Widget _serviceCodeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label("Service Code*"),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _serviceCodeController,
+          decoration: _inputDecoration("e.g. A001"),
+        ),
+      ],
+    );
   }
+
+  Widget _amountField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _label("Amount*"),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _amountController,
+          keyboardType: TextInputType.number,
+          decoration: _inputDecoration("e.g. 25.00"),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          "Amount can be set based on service",
+          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    );
+  }
+
+  Widget _label(String text) => Text(text, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700));
+
+  void _addBillItem() {
+    if (_serviceCodeController.text.trim().isEmpty || _amountController.text.trim().isEmpty) return;
+
+    final unitPrice = double.tryParse(_amountController.text.trim());
+    if (unitPrice == null) return;
+
+    setState(() {
+      billItems.add(
+        BillItem(
+          code: _serviceCodeController.text.trim(),
+          description: selectedService ?? 'Service',
+          unitPrice: unitPrice,
+          unit: 1,
+        ),
+      );
+      _serviceCodeController.clear();
+      _amountController.clear();
+      selectedService = null;
+    });
+  }
+
+  double _calculateTotal() => billItems.fold(0, (sum, it) => sum + it.unitPrice * it.unit);
 
   void _submitBill() {
-    if (_formKey.currentState!.validate() && billItems.isNotEmpty) {
+    final ok = (_formKey.currentState?.validate() ?? false) && billItems.isNotEmpty;
+    if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bill submitted successfully')),
+        const SnackBar(content: Text('Fill required fields and add at least one item')),
       );
-      // Reset form
-      _patientNameController.clear();
-      _ohipNumberController.clear();
-      _noteController.clear();
-      setState(() {
-        billItems.clear();
-        selectedDate = DateTime.now();
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields and add at least one item')),
-      );
+      return;
     }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Bill submitted successfully')),
+    );
+
+    _patientNameController.clear();
+    _ohipNumberController.clear();
+    _noteController.clear();
+
+    setState(() {
+      billItems.clear();
+      selectedDate = DateTime.now();
+    });
   }
 
   @override
@@ -549,19 +533,168 @@ class _NewBillFormState extends State<NewBillForm> {
   }
 }
 
-// Bills List View Widget
+class _RadioChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _RadioChip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          color: selected ? const Color(0xFFEEF2FF) : Colors.white,
+          border: Border.all(color: selected ? const Color(0xFF3F51B5) : const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                size: 18, color: selected ? const Color(0xFF3F51B5) : const Color(0xFF6B7280)),
+            const SizedBox(width: 8),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewTable extends StatelessWidget {
+  final List<BillItem> items;
+  final ValueChanged<BillItem> onRemove;
+  final double total;
+
+  const _PreviewTable({required this.items, required this.onRemove, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        // horizontal scroll always safe, table has a minimum width
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Column(
+                children: [
+                  DataTable(
+                    headingRowHeight: 48,
+                    dataRowMinHeight: 52,
+                    dataRowMaxHeight: 60,
+                    columnSpacing: 24,
+                    headingTextStyle: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF111827)),
+                    columns: const [
+                      DataColumn(label: Text("Code")),
+                      DataColumn(label: Text("Description")),
+                      DataColumn(label: Text("Unit Price")),
+                      DataColumn(label: Text("Unit")),
+                      DataColumn(label: Text("")),
+                    ],
+                    rows: items.isEmpty
+                        ? const []
+                        : items.map((it) {
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(it.code)),
+                                DataCell(SizedBox(width: 220, child: Text(it.description, overflow: TextOverflow.ellipsis))),
+                                DataCell(Text("\$${it.unitPrice.toStringAsFixed(2)}")),
+                                DataCell(Text("${it.unit}")),
+                                DataCell(
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => onRemove(it),
+                                    tooltip: "Remove",
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                  ),
+                  if (items.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(18),
+                      child: Text("No items added yet", style: TextStyle(color: Color(0xFF6B7280))),
+                    ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text("Total:", style: TextStyle(fontWeight: FontWeight.w800)),
+                        const SizedBox(width: 12),
+                        Text(
+                          "\$${total.toStringAsFixed(2)}",
+                          style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF3F51B5), fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CardShell extends StatelessWidget {
+  final Widget child;
+  const _CardShell({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+// -------------------- Bills List (Cards on mobile, Table on desktop) --------------------
+
 class BillsListView extends StatelessWidget {
   final List<Bill> bills;
   final bool isLoading;
+  final bool wide;
+
   final int rowsPerPage;
   final int currentPage;
-  final Function(int?) onRowsPerPageChanged;
-  final Function(int) onPageChanged;
+  final ValueChanged<int> onRowsPerPageChanged;
+  final ValueChanged<int> onPageChanged;
 
   const BillsListView({
     super.key,
     required this.bills,
     required this.isLoading,
+    required this.wide,
     required this.rowsPerPage,
     required this.currentPage,
     required this.onRowsPerPageChanged,
@@ -570,130 +703,187 @@ class BillsListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final startIndex = currentPage * rowsPerPage;
-    final endIndex = (startIndex + rowsPerPage > bills.length) ? bills.length : startIndex + rowsPerPage;
-    final displayedBills = bills.sublist(startIndex, endIndex);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(24),
+    return _CardShell(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Bills",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-
-          // Table
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                  ),
-                  child: const Row(
-                    children: [
-                      Expanded(child: Text("Date ↑", style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(child: Text("Time", style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(child: Text("Doctor", style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(child: Text("Patient", style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(child: Text("Type", style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(child: Text("Notes", style: TextStyle(fontWeight: FontWeight.bold))),
-                      Expanded(child: Text("Codes", style: TextStyle(fontWeight: FontWeight.bold))),
-                    ],
-                  ),
-                ),
-
-                // Rows
-                if (displayedBills.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(child: Text("No bills found", style: TextStyle(color: Colors.grey))),
-                  )
-                else
-                  ...displayedBills.map((bill) => _buildBillRow(bill)).toList(),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Pagination
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Text("Rows per page:"),
-              const SizedBox(width: 8),
-              DropdownButton<int>(
-                value: rowsPerPage,
-                items: [10, 25, 50].map((value) {
-                  return DropdownMenuItem(value: value, child: Text(value.toString()));
-                }).toList(),
-                onChanged: onRowsPerPageChanged,
-              ),
-              const SizedBox(width: 24),
-              Text("${startIndex + 1}–$endIndex of ${bills.length}"),
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                onPressed: currentPage > 0 ? () => onPageChanged(currentPage - 1) : null,
-              ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: endIndex < bills.length ? () => onPageChanged(currentPage + 1) : null,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBillRow(Bill bill) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-        color: Colors.white,
-      ),
-      child: Row(
-        children: [
-          Expanded(child: Text(DateFormat('MMM dd, yyyy').format(bill.date))),
-          Expanded(child: Text(bill.time)),
-          Expanded(child: Text(bill.doctor)),
-          Expanded(child: Text(bill.patient)),
-          Expanded(child: Text(bill.type)),
-          Expanded(child: Text(bill.notes, maxLines: 1, overflow: TextOverflow.ellipsis)),
-          Expanded(child: Text(bill.codes.join(', '))),
+          const Text("Bills", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 14),
+          if (isLoading)
+            const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+          else if (bills.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(18),
+              child: Text("No bills found", style: TextStyle(color: Color(0xFF6B7280))),
+            )
+          else
+            wide ? _DesktopBillsTable(
+              bills: bills,
+              rowsPerPage: rowsPerPage,
+              currentPage: currentPage,
+              onRowsPerPageChanged: onRowsPerPageChanged,
+              onPageChanged: onPageChanged,
+            ) : _MobileBillsCards(bills: bills),
         ],
       ),
     );
   }
 }
 
-// Models
+class _MobileBillsCards extends StatelessWidget {
+  final List<Bill> bills;
+  const _MobileBillsCards({required this.bills});
+
+  @override
+  Widget build(BuildContext context) {
+    // IMPORTANT: shrinkWrap + no scroll physics because parent is SingleChildScrollView
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: bills.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, i) {
+        final b = bills[i];
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(DateFormat('MMM dd, yyyy').format(b.date), style: const TextStyle(fontWeight: FontWeight.w900)),
+              const SizedBox(height: 6),
+              _kv("Time", b.time),
+              _kv("Doctor", b.doctor),
+              _kv("Patient", b.patient),
+              _kv("Type", b.type),
+              _kv("Notes", b.notes.isEmpty ? "-" : b.notes),
+              _kv("Codes", b.codes.join(", ")),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _kv(String k, String v) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 70, child: Text(k, style: const TextStyle(color: Color(0xFF6B7280), fontWeight: FontWeight.w700))),
+          const SizedBox(width: 10),
+          Expanded(child: Text(v, maxLines: 2, overflow: TextOverflow.ellipsis)),
+        ],
+      ),
+    );
+  }
+}
+
+class _DesktopBillsTable extends StatelessWidget {
+  final List<Bill> bills;
+  final int rowsPerPage;
+  final int currentPage;
+  final ValueChanged<int> onRowsPerPageChanged;
+  final ValueChanged<int> onPageChanged;
+
+  const _DesktopBillsTable({
+    required this.bills,
+    required this.rowsPerPage,
+    required this.currentPage,
+    required this.onRowsPerPageChanged,
+    required this.onPageChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final startIndex = currentPage * rowsPerPage;
+    final endIndex = (startIndex + rowsPerPage > bills.length) ? bills.length : (startIndex + rowsPerPage);
+    final pageBills = bills.sublist(startIndex, endIndex);
+
+    return Column(
+      children: [
+        LayoutBuilder(
+          builder: (_, constraints) {
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: DataTable(
+                  headingRowHeight: 48,
+                  dataRowMinHeight: 52,
+                  dataRowMaxHeight: 60,
+                  columnSpacing: 22,
+                  headingTextStyle: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF111827)),
+                  columns: const [
+                    DataColumn(label: Text("Date")),
+                    DataColumn(label: Text("Time")),
+                    DataColumn(label: Text("Doctor")),
+                    DataColumn(label: Text("Patient")),
+                    DataColumn(label: Text("Type")),
+                    DataColumn(label: Text("Notes")),
+                    DataColumn(label: Text("Codes")),
+                  ],
+                  rows: pageBills.map((b) {
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(DateFormat('MMM dd, yyyy').format(b.date))),
+                        DataCell(Text(b.time)),
+                        DataCell(SizedBox(width: 160, child: Text(b.doctor, overflow: TextOverflow.ellipsis))),
+                        DataCell(SizedBox(width: 160, child: Text(b.patient, overflow: TextOverflow.ellipsis))),
+                        DataCell(Text(b.type)),
+                        DataCell(SizedBox(width: 220, child: Text(b.notes, maxLines: 1, overflow: TextOverflow.ellipsis))),
+                        DataCell(SizedBox(width: 220, child: Text(b.codes.join(', '), maxLines: 1, overflow: TextOverflow.ellipsis))),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Pagination
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Text("Rows per page:", style: TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(width: 10),
+            DropdownButton<int>(
+              value: rowsPerPage,
+              items: const [10, 25, 50]
+                  .map((v) => DropdownMenuItem(value: v, child: Text("$v")))
+                  .toList(),
+              onChanged: (v) {
+                if (v == null) return;
+                onRowsPerPageChanged(v);
+              },
+            ),
+            const SizedBox(width: 18),
+            Text("${startIndex + 1}–$endIndex of ${bills.length}", style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              onPressed: currentPage > 0 ? () => onPageChanged(currentPage - 1) : null,
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              onPressed: endIndex < bills.length ? () => onPageChanged(currentPage + 1) : null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// -------------------- Models --------------------
+
 class Bill {
   final String id;
   final DateTime date;
@@ -717,14 +907,14 @@ class Bill {
 
   factory Bill.fromJson(Map<String, dynamic> json) {
     return Bill(
-      id: json['id'],
+      id: json['id']?.toString() ?? '',
       date: DateTime.parse(json['date']),
-      time: json['time'],
-      doctor: json['doctor'],
-      patient: json['patient'],
-      type: json['type'],
-      notes: json['notes'],
-      codes: List<String>.from(json['codes']),
+      time: json['time'] ?? '',
+      doctor: json['doctor'] ?? '',
+      patient: json['patient'] ?? '',
+      type: json['type'] ?? '',
+      notes: json['notes'] ?? '',
+      codes: List<String>.from(json['codes'] ?? const []),
     );
   }
 }
