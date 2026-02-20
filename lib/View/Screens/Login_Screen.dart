@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -88,21 +91,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Top-left brand row (logo + eHospital)
                   Row(
+                    mainAxisAlignment: (!kIsWeb ) ? MainAxisAlignment.center: MainAxisAlignment.start,
                     children: [
                       SvgPicture.asset(
   "assets/ehospital_logo.svg",
-  height: 36,
+  height: 72,
+  // width: 64,
 ),
                       const SizedBox(width: 12),
-                      const Text(
-                        "eHospital",
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w800,
-                          color: primary,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
+                      // const Text(
+                      //   "eHospital",
+                      //   style: TextStyle(
+                      //     fontSize: 30,
+                      //     fontWeight: FontWeight.w800,
+                      //     color: primary,
+                      //     letterSpacing: 0.2,
+                      //   ),
+                      // ),
                     ],
                   ),
 

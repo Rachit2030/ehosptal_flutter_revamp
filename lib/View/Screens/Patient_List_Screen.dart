@@ -270,11 +270,11 @@ class _PatientListScreenState extends State<PatientListScreen> {
                             label: const Text("Previous"),
                           ),
                           const Spacer(),
-                          _PageNumbers(
+                         (kIsWeb)? _PageNumbers(
                             current: _page,
                             total: _totalPages,
                             onSelect: (p) => setState(() => _page = p),
-                          ),
+                          ): SizedBox.shrink(),
                           const Spacer(),
                           FilledButton.icon(
                             onPressed: _page < _totalPages

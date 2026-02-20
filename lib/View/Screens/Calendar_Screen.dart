@@ -728,8 +728,8 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
       elevation: 24,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        width: 500,
-        padding: const EdgeInsets.all(24),
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -922,6 +922,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                                     : 'Select Date',
                                 style: TextStyle(
                                   color: _selectedDate != null ? Colors.black87 : Colors.grey[600],
+                                  overflow: TextOverflow.ellipsis
                                 ),
                               ),
                             ],
