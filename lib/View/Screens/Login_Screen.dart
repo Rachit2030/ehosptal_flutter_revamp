@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
-import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_Screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Patient_Dashboard_Screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final res = await api.login(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
-      selectedOption: selectedRole, // "Doctor" or "Patient"
+      role: selectedRole, // "Doctor" or "Patient"
     );
 
     if (!mounted) return;
@@ -55,10 +56,12 @@ class _LoginScreenState extends State<LoginScreen> {
     // Navigate after successful login
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => DoctorDashboardScreen(doctor: res),
-      ),
-    );
+    MaterialPageRoute(
+      builder: (_) => selectedRole == "Doctor"
+        ? DoctorDashboardScreen(doctor: res)
+        : PatientDashboardScreen(patient: res),
+  ),
+);
   } catch (e) {
     if (!mounted) return;
     setState(() => isLoading = false);

@@ -5,9 +5,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class CalendarScreen extends StatefulWidget {
-  final String doctorId; // Add this parameter
-  
-  const CalendarScreen({super.key, required this.doctorId}); // Update constructor
+  final String doctorId;
+
+  const CalendarScreen({super.key, required this.doctorId});
 
   @override
   State<CalendarScreen> createState() => _CalendarScreenState();
@@ -18,8 +18,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime? _selectedDay;
   Map<DateTime, List<Task>> _tasks = {};
   bool _isLoading = false;
-  
-  // Use doctorId from widget
+
   String get doctorId => widget.doctorId;
 
   @override
@@ -29,13 +28,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _fetchTasks();
   }
 
-  // Fetch tasks from API
   Future<void> _fetchTasks() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final response = await http.get(
-        Uri.parse('https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks'),
+        Uri.parse(
+          'https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks',
+        ),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -48,11 +48,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
         for (var taskJson in tasksJson) {
           final task = Task.fromJson(taskJson);
-          final dateKey = DateTime.utc(task.date.year, task.date.month, task.date.day);
-          
-          if (groupedTasks[dateKey] == null) {
-            groupedTasks[dateKey] = [];
-          }
+          final dateKey = DateTime.utc(
+            task.date.year,
+            task.date.month,
+            task.date.day,
+          );
+
+          groupedTasks.putIfAbsent(dateKey, () => []);
           groupedTasks[dateKey]!.add(task);
         }
 
@@ -70,14 +72,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  // Create new task - also update this to include Title field
   Future<void> _createTask(Task task) async {
     try {
-      // Combine date and time properly
       final taskDateTime = DateTime(
         task.date.year,
         task.date.month,
@@ -89,16 +91,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
       final requestBody = {
         'Doctor': doctorId,
         'Patient': task.patientId ?? '',
-        'Title': task.title,  // Add Title field
+        'Title': task.title,
         'Start': taskDateTime.toIso8601String(),
         'End': taskDateTime.add(const Duration(hours: 1)).toIso8601String(),
-        'Description': task.description.isNotEmpty ? task.description : task.title,
+        'Description':
+            task.description.isNotEmpty ? task.description : task.title,
       };
 
       print('Creating task with body: ${jsonEncode(requestBody)}');
 
       final response = await http.post(
-        Uri.parse('https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks/add'),
+        Uri.parse(
+          'https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks/add',
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
@@ -107,14 +112,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        await _fetchTasks(); // Refresh tasks
+        await _fetchTasks();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Task created successfully')),
           );
         }
       } else {
-        throw Exception('Failed to create task: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to create task: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       print('Error creating task: $e');
@@ -126,10 +133,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  // Update task
   Future<void> _updateTask(Task task) async {
     try {
-      // Combine date and time properly
       final taskDateTime = DateTime(
         task.date.year,
         task.date.month,
@@ -138,11 +143,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
         task.time.minute,
       );
 
-      // Fix: Send title separately, and use description if available, otherwise use title
       final requestBody = {
         'Patient': task.patientId ?? '',
-        'Title': task.title,  // Add Title field
-        'Description': task.description.isNotEmpty ? task.description : task.title,
+        'Title': task.title,
+        'Description':
+            task.description.isNotEmpty ? task.description : task.title,
         'Start': taskDateTime.toIso8601String(),
         'End': taskDateTime.add(const Duration(hours: 1)).toIso8601String(),
       };
@@ -150,7 +155,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
       print('Updating task ${task.id} with body: ${jsonEncode(requestBody)}');
 
       final response = await http.put(
-        Uri.parse('https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks/${task.id}'),
+        Uri.parse(
+          'https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks/${task.id}',
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
@@ -159,14 +166,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        await _fetchTasks(); // Refresh tasks
+        await _fetchTasks();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Task updated successfully')),
           );
         }
       } else {
-        throw Exception('Failed to update task: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to update task: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       print('Error updating task: $e');
@@ -178,13 +187,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  // Delete task
   Future<void> _deleteTask(String taskId) async {
     try {
       print('Deleting task: $taskId');
 
       final response = await http.delete(
-        Uri.parse('https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks/$taskId'),
+        Uri.parse(
+          'https://tysnx3mi2s.us-east-1.awsapprunner.com/api/users/tasks/$taskId',
+        ),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -192,14 +202,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        await _fetchTasks(); // Refresh tasks
+        await _fetchTasks();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Task deleted successfully')),
           );
         }
       } else {
-        throw Exception('Failed to delete task: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to delete task: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       print('Error deleting task: $e');
@@ -222,7 +234,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isMobile = constraints.maxWidth < 900;
-          
+
           return _isLoading
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
@@ -231,7 +243,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header
                         const Text(
                           "Calendar",
                           style: TextStyle(
@@ -242,7 +253,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Calendar Card
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -260,11 +270,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             firstDay: DateTime.utc(2020, 1, 1),
                             lastDay: DateTime.utc(2030, 12, 31),
                             focusedDay: _focusedDay,
-                            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                            selectedDayPredicate: (day) =>
+                                isSameDay(_selectedDay, day),
                             calendarFormat: CalendarFormat.month,
                             startingDayOfWeek: StartingDayOfWeek.monday,
                             eventLoader: _getTasksForDay,
-                            
                             calendarStyle: CalendarStyle(
                               todayDecoration: BoxDecoration(
                                 color: const Color(0xFF3F51B5).withOpacity(0.3),
@@ -278,11 +288,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 color: Color(0xFFFF5252),
                                 shape: BoxShape.circle,
                               ),
-                              weekendTextStyle: const TextStyle(color: Colors.black87),
+                              weekendTextStyle:
+                                  const TextStyle(color: Colors.black87),
                               outsideDaysVisible: true,
-                              outsideTextStyle: TextStyle(color: Colors.grey[400]),
+                              outsideTextStyle:
+                                  TextStyle(color: Colors.grey[400]),
                             ),
-                            
                             headerStyle: HeaderStyle(
                               formatButtonVisible: false,
                               titleCentered: true,
@@ -291,10 +302,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF1A1A1A),
                               ),
-                              leftChevronIcon: const Icon(Icons.chevron_left, color: Color(0xFF3F51B5)),
-                              rightChevronIcon: const Icon(Icons.chevron_right, color: Color(0xFF3F51B5)),
+                              leftChevronIcon: const Icon(
+                                Icons.chevron_left,
+                                color: Color(0xFF3F51B5),
+                              ),
+                              rightChevronIcon: const Icon(
+                                Icons.chevron_right,
+                                color: Color(0xFF3F51B5),
+                              ),
                             ),
-                            
                             daysOfWeekStyle: DaysOfWeekStyle(
                               weekdayStyle: TextStyle(
                                 color: Colors.grey[600],
@@ -305,91 +321,99 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            
                             onDaySelected: (selectedDay, focusedDay) {
                               setState(() {
                                 _selectedDay = selectedDay;
                                 _focusedDay = focusedDay;
                               });
                             },
-                            
                             onPageChanged: (focusedDay) {
                               setState(() {
                                 _focusedDay = focusedDay;
                               });
-                              _fetchTasks(); // Fetch tasks for new month
+                              _fetchTasks();
                             },
                           ),
                         ),
 
                         const SizedBox(height: 24),
 
-                        // Tasks Section
-                        isMobile 
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Tasks for ${DateFormat('MMM dd, yyyy').format(_selectedDay ?? DateTime.now())}",
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1A1A1A),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () => _showAddTaskDialog(context),
-                                    icon: const Icon(Icons.add, size: 20),
-                                    label: const Text("Add Task"),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF3F51B5),
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
+                        isMobile
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
                                     "Tasks for ${DateFormat('MMM dd, yyyy').format(_selectedDay ?? DateTime.now())}",
                                     style: const TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: Color(0xFF1A1A1A),
                                     ),
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                                ElevatedButton.icon(
-                                  onPressed: () => _showAddTaskDialog(context),
-                                  icon: const Icon(Icons.add, size: 20),
-                                  label: const Text("Add Task"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3F51B5),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton.icon(
+                                      onPressed: () =>
+                                          _showAddTaskDialog(context),
+                                      icon: const Icon(Icons.add, size: 20),
+                                      label: const Text("Add Task"),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            const Color(0xFF3F51B5),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              )
+                            : Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "Tasks for ${DateFormat('MMM dd, yyyy').format(_selectedDay ?? DateTime.now())}",
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1A1A1A),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  ElevatedButton.icon(
+                                    onPressed: () =>
+                                        _showAddTaskDialog(context),
+                                    icon: const Icon(Icons.add, size: 20),
+                                    label: const Text("Add Task"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          const Color(0xFF3F51B5),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
 
                         const SizedBox(height: 16),
-
-                        // Task List
                         _buildTaskList(),
                       ],
                     ),
@@ -402,7 +426,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildTaskList() {
     final tasks = _getTasksForDay(_selectedDay ?? DateTime.now());
-    
+
     if (tasks.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(40),
@@ -457,7 +481,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Priority Icon
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -471,8 +494,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
             ),
             const SizedBox(width: 16),
-            
-            // Task Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -488,7 +509,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                      Icon(Icons.access_time,
+                          size: 14, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
                         task.time.format(context),
@@ -499,7 +521,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                       const SizedBox(width: 16),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: task.priority.color.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
@@ -530,8 +555,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 ],
               ),
             ),
-            
-            // Actions
             PopupMenuButton(
               icon: const Icon(Icons.more_vert, color: Colors.grey),
               itemBuilder: (context) => [
@@ -596,7 +619,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 }
 
-// Task Model
 class Task {
   final String id;
   final String title;
@@ -618,10 +640,10 @@ class Task {
 
   factory Task.fromJson(Map<String, dynamic> json) {
     final startTime = DateTime.parse(json['Start']);
-    
+
     return Task(
       id: json['id'].toString(),
-      title: json['Title'] ?? json['Description'] ?? 'Task',  // Try Title first, then Description
+      title: json['Title'] ?? json['Description'] ?? 'Task',
       priority: TaskPriority.none,
       date: startTime,
       time: TimeOfDay(hour: startTime.hour, minute: startTime.minute),
@@ -677,7 +699,6 @@ enum TaskPriority {
   }
 }
 
-// Add Task Dialog
 class AddTaskDialog extends StatefulWidget {
   final DateTime selectedDate;
   final Task? existingTask;
@@ -699,7 +720,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _patientIdController = TextEditingController();
-  
+
   TaskPriority _selectedPriority = TaskPriority.none;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -709,12 +730,12 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
   void initState() {
     super.initState();
     _selectedDate = widget.selectedDate;
-    _selectedTime = TimeOfDay.now(); // Set default time
-    
+    _selectedTime = TimeOfDay.now();
+
     if (widget.existingTask != null) {
       _titleController.text = widget.existingTask!.title;
       _descriptionController.text = widget.existingTask!.description;
-      _patientIdController.text = widget.existingTask!.patientId ?? ''; // Fix: Ensure patient ID is set
+      _patientIdController.text = widget.existingTask!.patientId ?? '';
       _selectedPriority = widget.existingTask!.priority;
       _selectedDate = widget.existingTask!.date;
       _selectedTime = widget.existingTask!.time;
@@ -737,12 +758,13 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.existingTask != null ? "Edit task" : "Add a new task",
+                      widget.existingTask != null
+                          ? "Edit task"
+                          : "Add a new task",
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -751,62 +773,75 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Color(0xFF3F51B5)),
+                      icon:
+                          const Icon(Icons.close, color: Color(0xFF3F51B5)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
 
-                // Title
-                const Text("Title", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const Text("Title",
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
                     hintText: "Enter task title",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF3F51B5)),
+                      borderSide:
+                          const BorderSide(color: Color(0xFF3F51B5)),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
-                  validator: (value) => value?.isEmpty ?? true ? 'Please enter a title' : null,
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Please enter a title' : null,
                 ),
                 const SizedBox(height: 20),
 
-                // Patient ID
-                const Text("Patient ID (Optional)", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const Text("Patient ID (Optional)",
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _patientIdController,
                   decoration: InputDecoration(
                     hintText: "Enter patient ID",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF3F51B5)),
+                      borderSide:
+                          const BorderSide(color: Color(0xFF3F51B5)),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Priority
-                const Text("Priority", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const Text("Priority",
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 InkWell(
-                  onTap: () => setState(() => _showPriorityDropdown = !_showPriorityDropdown),
+                  onTap: () =>
+                      setState(() => _showPriorityDropdown = !_showPriorityDropdown),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey[300]!),
                       borderRadius: BorderRadius.circular(10),
@@ -816,27 +851,29 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                       children: [
                         Row(
                           children: [
-                            Icon(_selectedPriority.icon, color: _selectedPriority.color, size: 20),
+                            Icon(_selectedPriority.icon,
+                                color: _selectedPriority.color, size: 20),
                             const SizedBox(width: 8),
                             Text(
-                              _selectedPriority.label, 
+                              _selectedPriority.label,
                               style: TextStyle(
-                                color: _selectedPriority == TaskPriority.none 
-                                    ? Colors.grey[600] 
+                                color: _selectedPriority == TaskPriority.none
+                                    ? Colors.grey[600]
                                     : _selectedPriority.color,
                               ),
                             ),
                           ],
                         ),
                         Icon(
-                          _showPriorityDropdown ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                          _showPriorityDropdown
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
                           color: Colors.grey[600],
                         ),
                       ],
                     ),
                   ),
                 ),
-                
                 if (_showPriorityDropdown) ...[
                   const SizedBox(height: 8),
                   Container(
@@ -860,7 +897,8 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                             _showPriorityDropdown = false;
                           }),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: priority != TaskPriority.values.last
@@ -870,10 +908,11 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                             ),
                             child: Row(
                               children: [
-                                Icon(priority.icon, color: priority.color, size: 20),
+                                Icon(priority.icon,
+                                    color: priority.color, size: 20),
                                 const SizedBox(width: 12),
                                 Text(
-                                  priority.label, 
+                                  priority.label,
                                   style: TextStyle(
                                     color: priority.color,
                                     fontWeight: FontWeight.w500,
@@ -887,11 +926,11 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                     ),
                   ),
                 ],
-                
                 const SizedBox(height: 20),
 
-                // Date/Time
-                const Text("Date/Time", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const Text("Date/Time",
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -904,25 +943,34 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                             firstDate: DateTime.now(),
                             lastDate: DateTime(2030),
                           );
-                          if (date != null) setState(() => _selectedDate = date);
+                          if (date != null) {
+                            setState(() => _selectedDate = date);
+                          }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey[300]!),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.calendar_today, size: 20, color: Colors.grey[600]),
+                              Icon(Icons.calendar_today,
+                                  size: 20, color: Colors.grey[600]),
                               const SizedBox(width: 8),
-                              Text(
-                                _selectedDate != null 
-                                    ? DateFormat('MMM dd, yyyy').format(_selectedDate!) 
-                                    : 'Select Date',
-                                style: TextStyle(
-                                  color: _selectedDate != null ? Colors.black87 : Colors.grey[600],
-                                  overflow: TextOverflow.ellipsis
+                              Expanded(
+                                child: Text(
+                                  _selectedDate != null
+                                      ? DateFormat('MMM dd, yyyy')
+                                          .format(_selectedDate!)
+                                      : 'Select Date',
+                                  style: TextStyle(
+                                    color: _selectedDate != null
+                                        ? Colors.black87
+                                        : Colors.grey[600],
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -935,27 +983,33 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                       child: InkWell(
                         onTap: () async {
                           final time = await showTimePicker(
-                            context: context, 
+                            context: context,
                             initialTime: _selectedTime ?? TimeOfDay.now(),
                           );
-                          if (time != null) setState(() => _selectedTime = time);
+                          if (time != null) {
+                            setState(() => _selectedTime = time);
+                          }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey[300]!),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.access_time, size: 20, color: Colors.grey[600]),
+                              Icon(Icons.access_time,
+                                  size: 20, color: Colors.grey[600]),
                               const SizedBox(width: 8),
                               Text(
-                                _selectedTime != null 
-                                    ? _selectedTime!.format(context) 
+                                _selectedTime != null
+                                    ? _selectedTime!.format(context)
                                     : 'Select Time',
                                 style: TextStyle(
-                                  color: _selectedTime != null ? Colors.black87 : Colors.grey[600],
+                                  color: _selectedTime != null
+                                      ? Colors.black87
+                                      : Colors.grey[600],
                                 ),
                               ),
                             ],
@@ -967,29 +1021,32 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                 ),
                 const SizedBox(height: 20),
 
-                // Description
-                const Text("Description", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                const Text("Description",
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 4,
                   decoration: InputDecoration(
                     hintText: "Enter task description",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF3F51B5)),
+                      borderSide:
+                          const BorderSide(color: Color(0xFF3F51B5)),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -997,18 +1054,21 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                       onPressed: () => Navigator.pop(context),
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.grey[200],
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: const Text("Cancel", style: TextStyle(color: Colors.black87)),
+                      child: const Text("Cancel",
+                          style: TextStyle(color: Colors.black87)),
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton(
                       onPressed: () {
-                        if (_formKey.currentState!.validate() && _selectedDate != null && _selectedTime != null) {
-                          // Debug: Print the values being sent
+                        if (_formKey.currentState!.validate() &&
+                            _selectedDate != null &&
+                            _selectedTime != null) {
                           print('=== Task Form Values ===');
                           print('ID: ${widget.existingTask?.id ?? "NEW"}');
                           print('Title: ${_titleController.text}');
@@ -1017,7 +1077,7 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                           print('Date: $_selectedDate');
                           print('Time: $_selectedTime');
                           print('Priority: $_selectedPriority');
-                          
+
                           final task = Task(
                             id: widget.existingTask?.id ?? '',
                             title: _titleController.text.trim(),
@@ -1025,16 +1085,19 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                             date: _selectedDate!,
                             time: _selectedTime!,
                             description: _descriptionController.text.trim(),
-                            patientId: _patientIdController.text.trim().isNotEmpty 
-                                ? _patientIdController.text.trim() 
+                            patientId: _patientIdController.text.trim().isNotEmpty
+                                ? _patientIdController.text.trim()
                                 : null,
                           );
+
                           widget.onTaskAdded(task);
                           Navigator.pop(context);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Please fill all required fields (Title, Date, Time)'),
+                              content: Text(
+                                'Please fill all required fields (Title, Date, Time)',
+                              ),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -1043,7 +1106,8 @@ class _AddTaskDialogState extends State<AddTaskDialog> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF3F51B5),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
