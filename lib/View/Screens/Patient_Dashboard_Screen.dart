@@ -3,6 +3,8 @@ import 'package:ehosptal_flutter_revamp/View/Widgets/Patient_Appointments_Overvi
 import 'package:ehosptal_flutter_revamp/View/Widgets/Patient_Health_Summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Messaging_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/My_Health_Screen.dart';
 
 class PatientDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> patient;
@@ -105,9 +107,9 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
       case 1:
         return const Center(child: Text("Appointments (Coming Soon)"));
       case 2:
-        return const Center(child: Text("My Health (Coming Soon)"));
+        return MyHealthScreen(patient: widget.patient);
       case 3:
-        return const Center(child: Text("Messages (Coming Soon)"));
+        return MessagingScreen(patient: widget.patient);
       case 4:
         return const Center(child: Text("Help (Coming Soon)"));
       default:
