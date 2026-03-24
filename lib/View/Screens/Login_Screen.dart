@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
-import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_Screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Patient_Dashboard_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/PharmaceuticalOffice/pharma_office_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  final List<String> roles = const ["Doctor", "Patient"];
+  final List<String> roles = const ["Doctor", "Patient", "Pharmaceutical Office"];
   String selectedRole = "Doctor";
 
   bool rememberMe = false;
@@ -34,40 +36,50 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> onLogin() async {
-  FocusScope.of(context).unfocus();
+    FocusScope.of(context).unfocus();
 
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  setState(() => isLoading = true);
+    // Pharmaceutical Office bypasses the API — no backend credentials needed yet
+    if (selectedRole == "Pharmaceutical Office") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const PharmaOfficeShell()),
+      );
+      return;
+    }
 
-  try {
-    final api = ApiService();
+    setState(() => isLoading = true);
 
-    final res = await api.login(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-      selectedOption: selectedRole, // "Doctor" or "Patient"
-    );
+    try {
+      final api = ApiService();
 
-    if (!mounted) return;
-    setState(() => isLoading = false);
+      final res = await api.login(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        role: selectedRole,
+      );
 
-    // Navigate after successful login
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => DoctorDashboardScreen(doctor: res),
-      ),
-    );
-  } catch (e) {
-    if (!mounted) return;
-    setState(() => isLoading = false);
+      if (!mounted) return;
+      setState(() => isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Login failed: $e")),
-    );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => selectedRole == "Doctor"
+              ? DoctorDashboardScreen(doctor: res)
+              : PatientDashboardScreen(patient: res),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Login failed: $e")),
+      );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {

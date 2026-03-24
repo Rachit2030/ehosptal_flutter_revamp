@@ -20,6 +20,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("DOCTOR DASHBOARD BUILD => ${DateTime.now()}");
     const primary = Color(0xFF3F51B5);
     const bg = Color(0xFFF5F7FB);
 
@@ -216,28 +217,26 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   }
 
   Widget _menuItem(IconData icon, String title, int index, bool isDrawer) {
-    const primary = Color(0xFF3F51B5);
-    final selected = selectedIndex == index;
+  const blue = Color(0xFF1E4ED8);
+  final selected = selectedIndex == index;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: selected
-          ? BoxDecoration(
-              color: const Color(0xFFE8EAF6),
-              borderRadius: BorderRadius.circular(10),
-            )
-          : null,
-      child: InkWell(
-        onTap: () {
-          setState(() => selectedIndex = index);
-
-          // ✅ close drawer on mobile
-          if (isDrawer) Navigator.pop(context);
-        },
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+    decoration: BoxDecoration(
+      color: selected ? blue : Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () {
+        setState(() => selectedIndex = index);
+        if (isDrawer) Navigator.pop(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            Icon(icon, color: selected ? primary : Colors.grey, size: 20),
+            Icon(icon, color: selected ? Colors.white : Colors.grey, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -245,14 +244,15 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: selected ? primary : Colors.grey,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  color: selected ? Colors.white : Colors.grey,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
