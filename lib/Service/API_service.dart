@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-// ✅ Correct path based on your screenshot:
-import 'package:ehosptal_flutter_revamp/model/patient.dart';
-import 'package:ehosptal_flutter_revamp/model/message_models.dart';
+import 'package:ehosptal_flutter_revamp/Model/patient.dart';
+import 'package:ehosptal_flutter_revamp/Model/message_models.dart';
 
 // If the package name above ever errors, use this instead (relative import):
-// import '../model/patient.dart';
+// import '../Model/patient.dart';
 
 class ApiService {
   static const String baseUrl =

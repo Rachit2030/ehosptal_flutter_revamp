@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:ehosptal_flutter_revamp/model/patient.dart';
+import 'package:ehosptal_flutter_revamp/Model/patient.dart';
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
 import 'PatientProfileScreen.dart';
 
 // If your package import ever fails (pubspec name mismatch), use these instead:
-// import '../../model/patient.dart';
+// import '../../Model/patient.dart';
 // import '../../Service/API_service.dart';
 
 class PatientListScreen extends StatefulWidget {
