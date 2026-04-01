@@ -5,6 +5,7 @@ import 'package:ehosptal_flutter_revamp/View/Screens/Calendar_Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Billing_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Login_Screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -205,8 +206,12 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
           TextButton.icon(
             onPressed: () {
-              if (isDrawer) Navigator.pop(context); // close drawer
-              Navigator.pop(context); // back (adjust if you want logout nav)
+              if (isDrawer) Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (route) => false,
+            );
             },
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),

@@ -10,6 +10,7 @@ import 'pages/clinical_trials/pharmaceuticals_clinical_trial_page.dart';
 import 'pages/clinical_trials/pharmaceuticals_clinical_trial_add_page.dart';
 import 'pages/clinical_trials/pharmaceuticals_specific_trial_page.dart';
 import 'pages/management/pharmaceuticals_management_page.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Login_Screen.dart';
 
 const _primary = Color(0xFF1E4ED8);
 const _bg = Color(0xFFF5F7FB);
@@ -25,14 +26,13 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
   String selectedKey = 'Dashboard';
 
   static const _pages = [
-    ('Dashboard',    Icons.dashboard),
+    ('Dashboard',     Icons.dashboard),
     ('Clinical Trial', Icons.biotech_outlined),
-    ('Messages',     Icons.message_outlined),
-    ('Management',   Icons.account_tree_outlined),
-    ('Inventory',    Icons.inventory_2_outlined),
+    ('Messages',      Icons.message_outlined),
+    ('Management',    Icons.account_tree_outlined),
+    ('Inventory',     Icons.inventory_2_outlined),
     ('Prescriptions', Icons.description_outlined),
-    ('Help',         Icons.help_outline_rounded),
-    ('Orchestrator', Icons.hub_outlined),
+    ('Help',          Icons.help_outline_rounded),
   ];
 
   Widget _buildPage() {
@@ -105,25 +105,39 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
             ),
           ),
           const SizedBox(height: 30),
-          for (final (label, icon) in _pages)
-            _MenuItem(
-              icon: icon,
-              label: label,
-              selected: selectedKey == label,
-              onTap: () {
-                setState(() => selectedKey = label);
-                if (isDrawer) Navigator.pop(context);
-              },
+          // Wrap nav items in Expanded + ScrollView to prevent overflow
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (final (label, icon) in _pages)
+                    _MenuItem(
+                      icon: icon,
+                      label: label,
+                      selected: selectedKey == label,
+                      onTap: () {
+                        setState(() => selectedKey = label);
+                        if (isDrawer) Navigator.pop(context);
+                      },
+                    ),
+                ],
+              ),
             ),
-          const Spacer(),
+          ),
+          const SizedBox(height: 8),
           TextButton.icon(
             onPressed: () {
               if (isDrawer) Navigator.pop(context);
-              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             },
             icon: const Icon(Icons.logout),
             label: const Text('Logout'),
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );
