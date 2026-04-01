@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import 'package:ehosptal_flutter_revamp/Model/patient.dart';
-import 'package:ehosptal_flutter_revamp/Model/message_models.dart';
+import 'package:ehosptal_flutter_revamp/model/patient.dart';
+import 'package:ehosptal_flutter_revamp/model/message_models.dart';
 
 // If the package name above ever errors, use this instead (relative import):
 // import '../Model/patient.dart';

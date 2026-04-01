@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:ehosptal_flutter_revamp/Model/patient.dart';
+import 'package:ehosptal_flutter_revamp/model/patient.dart';
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
 import 'PatientProfileScreen.dart';
 

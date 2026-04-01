@@ -1,6 +1,6 @@
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Send_New_Message_Screen.dart';
-import 'package:ehosptal_flutter_revamp/Model/message_models.dart';
+import 'package:ehosptal_flutter_revamp/model/message_models.dart';
 import 'package:flutter/material.dart';
 
 class MessagesScreen extends StatefulWidget {

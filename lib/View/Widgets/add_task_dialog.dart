@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../Model/task_model.dart';
+import '../../model/task_model.dart';
 
 class AddTaskDialog extends StatefulWidget {
   final TaskModel? task;

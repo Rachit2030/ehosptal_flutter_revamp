@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:ehosptal_flutter_revamp/Model/patient.dart';
+import 'package:ehosptal_flutter_revamp/model/patient.dart';
 
 class PatientProfileScreen extends StatefulWidget {
   final Patient patient;
