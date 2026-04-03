@@ -8,6 +8,7 @@ import 'package:ehosptal_flutter_revamp/View/Screens/Billing_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Orchestrator_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Orchestrator_Chat_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Messages_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Login_Screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -114,24 +115,6 @@ Widget _buildContent() {
                 style: TextStyle(color: Colors.black54),
               ),
             ),
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFB76BFF), Color(0xFF6B7CFF)],
-                ),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: const Text(
-                "AI Assistant",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(width: 14),
-            const Icon(Icons.notifications_none, color: Colors.black54),
-            const SizedBox(width: 10),
-            const Icon(Icons.person_outline, color: Colors.black54),
           ],
         ),
 
@@ -215,7 +198,10 @@ Widget _buildContent() {
           TextButton.icon(
             onPressed: () {
               if (isDrawer) Navigator.pop(context); // close drawer
-              Navigator.pop(context); // back (adjust if you want logout nav)
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (_) => false,
+              );
             },
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),

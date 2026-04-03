@@ -199,26 +199,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               SizedBox(width: 520, child: _SearchBox(controller: _searchController)),
-                              _ActionButton(
-                                label: "AI Chatbots",
-                                icon: Icons.smart_toy_outlined,
-                                onTap: () {},
-                              ),
-                              _ActionButton(
-                                label: "Analytics",
-                                icon: Icons.bar_chart_outlined,
-                                onTap: () {},
-                              ),
-                              _ActionButton(
-                                label: "Filter",
-                                icon: Icons.filter_alt_outlined,
-                                onTap: () {},
-                              ),
-                              _ActionButton(
-                                label: "Archive",
-                                icon: Icons.archive_outlined,
-                                onTap: () {},
-                              ),
                             ],
                           );
                         }
@@ -226,30 +206,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
                         return Row(
                           children: [
                             Expanded(child: _SearchBox(controller: _searchController)),
-                            const SizedBox(width: 12),
-                            _ActionButton(
-                              label: "AI Chatbots",
-                              icon: Icons.smart_toy_outlined,
-                              onTap: () {},
-                            ),
-                            const SizedBox(width: 10),
-                            _ActionButton(
-                              label: "Analytics",
-                              icon: Icons.bar_chart_outlined,
-                              onTap: () {},
-                            ),
-                            const SizedBox(width: 10),
-                            _ActionButton(
-                              label: "Filter",
-                              icon: Icons.filter_alt_outlined,
-                              onTap: () {},
-                            ),
-                            const SizedBox(width: 10),
-                            _ActionButton(
-                              label: "Archive",
-                              icon: Icons.archive_outlined,
-                              onTap: () {},
-                            ),
                           ],
                         );
                       },

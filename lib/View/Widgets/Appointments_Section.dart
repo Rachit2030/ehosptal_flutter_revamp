@@ -305,14 +305,6 @@ class _AppointmentsSectionState extends State<AppointmentsSection> {
                                 onStatusChanged: _updateStatusAtVisibleIndex,
                               ),
           ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {},
-              child: const Text("View all appointments"),
-            ),
-          ),
         ],
       ),
     );

@@ -439,30 +439,6 @@ class _LoginCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 14),
-
-              // Bottom row: Sign up
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don’t have an account? ",
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // TODO: navigate to signup
-                    },
-                    child: Text(
-                      "Sign up",
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),

@@ -185,11 +185,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
         backgroundColor: Colors.white,
         foregroundColor: primaryColor,
         elevation: 0,
-        actions: [
-          IconButton(icon: const Icon(Icons.edit), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.print), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.video_call), onPressed: () {}),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -226,19 +221,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2C5BFF),
                 ),
-              ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.edit, color: Color(0xFF2C5BFF)),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.description, color: Color(0xFF2C5BFF)),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.video_call, color: Color(0xFF2C5BFF)),
-                onPressed: () {},
               ),
             ],
           ),
@@ -571,15 +553,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                   color: Color(0xFF2C5BFF),
                 ),
               ),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('Past Encounter Notes'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF2C5BFF),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -703,10 +676,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                   ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.launch, size: 20),
-                onPressed: () {},
-              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -778,21 +747,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
           fontSize: 12,
           color: Color(0xFF2C5BFF),
           fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(IconData icon, String label) {
-    return Expanded(
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: Icon(icon, size: 16),
-        label: Text(label, style: const TextStyle(fontSize: 11)),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF2C5BFF),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          side: const BorderSide(color: Color(0xFF2C5BFF)),
         ),
       ),
     );
@@ -911,22 +865,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
             const Text(
               'Prescription History',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
             ),
           ],
         ),
@@ -1267,22 +1205,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
               'Surgical History',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.list),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -1457,22 +1379,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
             const Text(
               'Treatment History',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
             ),
           ],
         ),
@@ -1833,22 +1739,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
               'Referral History',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -2199,17 +2089,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
             ),
           ),
           actions: [
-            if (phone.isNotEmpty)
-              TextButton.icon(
-                onPressed: () {
-                  // TODO: Implement call functionality
-                },
-                icon: const Icon(Icons.phone, size: 18),
-                label: const Text('Call'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF2C5BFF),
-                ),
-              ),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text(
@@ -2272,22 +2151,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
             const Text(
               'Visit History',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
             ),
           ],
         ),
@@ -2656,22 +2519,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
             const Text(
               'Medical Tests History',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-              color: const Color(0xFF2C5BFF),
             ),
           ],
         ),

@@ -337,23 +337,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                     color: Color(0xFF1A1A1A),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () => _showAddTaskDialog(context),
-                                    icon: const Icon(Icons.add, size: 20),
-                                    label: const Text("Add Task"),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF3F51B5),
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ),
                               ],
                             )
                           : Row(
@@ -368,20 +351,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       color: Color(0xFF1A1A1A),
                                     ),
                                     overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                ElevatedButton.icon(
-                                  onPressed: () => _showAddTaskDialog(context),
-                                  icon: const Icon(Icons.add, size: 20),
-                                  label: const Text("Add Task"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3F51B5),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
                                   ),
                                 ),
                               ],
@@ -457,21 +426,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Priority Icon
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: task.priority.color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                task.priority.icon,
-                color: task.priority.color,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            
             // Task Details
             Expanded(
               child: Column(
@@ -529,40 +483,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ],
                 ],
               ),
-            ),
-            
-            // Actions
-            PopupMenuButton(
-              icon: const Icon(Icons.more_vert, color: Colors.grey),
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, size: 20),
-                      SizedBox(width: 8),
-                      Text('Edit'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, size: 20, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Delete', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                ),
-              ],
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  _showEditTaskDialog(context, task);
-                } else if (value == 'delete') {
-                  await _deleteTask(task.id);
-                }
-              },
             ),
           ],
         ),
