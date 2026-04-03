@@ -91,8 +91,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: (!kIsWeb ) ? MainAxisAlignment.center: MainAxisAlignment.start,
                     children: [
-                      SvgPicture.asset(
-  "assets/ehospital_logo.svg",
+                      Image.asset(
+  "assets/ehospital_logo.png",
   height: 72,
   // width: 64,
 ),

@@ -178,8 +178,8 @@ Widget _buildContent() {
         children: [
           const SizedBox(height: 20),
           Center(
-            child: SvgPicture.asset(
-              "assets/ehospital_logo.svg",
+            child: Image.asset(
+              "assets/ehospital_logo.png",
               height: 54,
               fit: BoxFit.contain,
             ),

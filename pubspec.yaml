@@ -63,7 +63,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/ehospital_logo.svg
+    - assets/ehospital_logo.png
     - assets/doctors_illustration.png
     - assets/data/
     - assets/data/bills.json
