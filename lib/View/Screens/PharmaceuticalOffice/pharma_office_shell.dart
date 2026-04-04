@@ -105,25 +105,17 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
             ),
           ),
           const SizedBox(height: 30),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  for (final (label, icon) in _pages)
-                    _MenuItem(
-                      icon: icon,
-                      label: label,
-                      selected: selectedKey == label,
-                      onTap: () {
-                        setState(() => selectedKey = label);
-                        if (isDrawer) Navigator.pop(context);
-                      },
-                    ),
-                ],
-              ),
+          for (final (label, icon) in _pages)
+            _MenuItem(
+              icon: icon,
+              label: label,
+              selected: selectedKey == label,
+              onTap: () {
+                setState(() => selectedKey = label);
+                if (isDrawer) Navigator.pop(context);
+              },
             ),
-          ),
-          const SizedBox(height: 8),
+          const Spacer(),
           TextButton.icon(
             onPressed: () {
               if (isDrawer) Navigator.pop(context);

@@ -39,24 +39,36 @@ class _PatientAppointmentsOverviewState extends State<PatientAppointmentsOvervie
   }
  
   Future<void> _fetchToday() async {
-    setState(() { loading = true; error = null; });
-    try {
-      final now   = DateTime.now();
-      final start = _startOfDayLocal(now);
-      final end   = _endOfDayLocal(now);
- 
-      final result = await _api.patientMainPageGetCalendar(
-        loginData: _buildLoginData(),
-        start: start,
-        end: end,
-        timezone: "America/Toronto",
-      );
- 
-      setState(() { appts = result; loading = false; });
-    } catch (e) {
-      setState(() { loading = false; error = e.toString(); });
-    }
+  setState(() { loading = true; error = null; });
+  try {
+    final result = await _api.patientMainPageGetCalendar(
+      loginData: {'id': widget.patient['id'] ?? widget.patient['patientId']},
+      start: DateTime.utc(2000, 1, 1),   // wide range — get all
+      end: DateTime.utc(2100, 1, 1),
+      timezone: 'America/Toronto',
+    );
+
+    // Filter to only upcoming from today onward
+    final now = DateTime.now();
+    final upcoming = result.where((item) {
+      try {
+        final dt = DateTime.parse((item['start'] ?? item['Start'] ?? '').toString()).toLocal();
+        return dt.isAfter(now);
+      } catch (_) { return false; }
+    }).toList();
+
+    upcoming.sort((a, b) {
+      final ad = DateTime.tryParse((a['start'] ?? '').toString());
+      final bd = DateTime.tryParse((b['start'] ?? '').toString());
+      if (ad == null || bd == null) return 0;
+      return ad.compareTo(bd);
+    });
+
+    setState(() { appts = upcoming; loading = false; });
+  } catch (e) {
+    setState(() { loading = false; error = e.toString(); });
   }
+}
  
   // ── Helpers ────────────────────────────────────────────────────────────────
  
@@ -76,14 +88,12 @@ class _PatientAppointmentsOverviewState extends State<PatientAppointmentsOvervie
   }
  
   String _doctorName(Map<String, dynamic> item) {
-    final doc = item["doctor"];
-    if (doc is Map) {
-      final fn = (doc["Fname"] ?? doc["FName"] ?? doc["name"] ?? "").toString();
-      final ln = (doc["Lname"] ?? doc["LName"] ?? "").toString();
-      return "$fn $ln".trim().isNotEmpty ? "$fn $ln".trim() : "Doctor";
-    }
-    return (item["doctor_name"] ?? item["doctorName"] ?? "Doctor").toString();
-  }
+  final doc = item['doctor'];
+  if (doc is Map && doc['name'] != null) return doc['name'].toString().trim();
+  final fn = (item['Fname'] ?? item['FName'] ?? '').toString().trim();
+  final ln = (item['Lname'] ?? item['LName'] ?? '').toString().trim();
+  return '$fn $ln'.trim().isNotEmpty ? '$fn $ln'.trim() : 'Doctor';
+}
  
   String _locationLabel(Map<String, dynamic> item) {
     final isVirtual = item["isVirtual"] == true || item["Virtual"] == true;
