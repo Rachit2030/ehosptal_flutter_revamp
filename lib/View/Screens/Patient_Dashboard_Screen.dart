@@ -7,6 +7,7 @@ import 'package:ehosptal_flutter_revamp/View/Screens/Messaging_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/My_Health_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Patient_Appointment_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Login_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/CRD_Screen.dart';
 
 class PatientDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> patient;
@@ -119,6 +120,8 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
         return MessagingScreen(patient: widget.patient);
       case 4:
         return const Center(child: Text("Help (Coming Soon)"));
+      case 5:
+        return const ClinicalReasoningDashboard();
       default:
         return const Center(child: Text("Coming Soon"));
     }
@@ -238,6 +241,7 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
           _menuItem(Icons.favorite_border, "My Health", 2, isDrawer),
           _menuItem(Icons.message_outlined, "Messages", 3, isDrawer),
           _menuItem(Icons.help_outline, "Help", 4, isDrawer),
+          _menuItem(Icons.hub_outlined, "CRD", 5, isDrawer),
 
           const Spacer(),
 

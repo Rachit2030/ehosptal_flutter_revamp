@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Billing_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Login_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/CRD_Screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -96,6 +97,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
       return OrchestratorScreen(doctorId: widget.doctor['id'].toString());
     } else if (selectedIndex == 6) {
       return OrchestratorChatScreen(doctorId: widget.doctor['id'].toString());
+    } else if (selectedIndex == 7) {
+  return const ClinicalReasoningDashboard();
     } else {
       return const Center(child: Text("Coming Soon"));
     }
@@ -212,6 +215,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
           _menuItem(Icons.message, "Messages", 4, isDrawer),
           _menuItem(Icons.smart_toy_outlined, "Clinical Analysis", 5, isDrawer),
           _menuItem(Icons.smart_toy_outlined, "Orchestrator Chat", 6, isDrawer),
+          _menuItem(Icons.hub_outlined, "CRD", 7, isDrawer),
 
           const Spacer(),
 

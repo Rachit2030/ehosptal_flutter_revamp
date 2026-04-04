@@ -11,6 +11,7 @@ import 'pages/clinical_trials/pharmaceuticals_clinical_trial_add_page.dart';
 import 'pages/clinical_trials/pharmaceuticals_specific_trial_page.dart';
 import 'pages/management/pharmaceuticals_management_page.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Login_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/CRD_Screen.dart';
 
 const _primary = Color(0xFF1E4ED8);
 const _bg = Color(0xFFF5F7FB);
@@ -33,6 +34,7 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
     ('Inventory',     Icons.inventory_2_outlined),
     ('Prescriptions', Icons.description_outlined),
     ('Help',          Icons.help_outline_rounded),
+    ('CRD', Icons.hub_outlined),
   ];
 
   Widget _buildPage() {
@@ -47,6 +49,7 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
       case 'Specific Trial':   return const PharmaceuticalsSpecificTrialPage();
       case 'Clinical Trial':   return const PharmaceuticalsClinicalTrialPage();
       case 'Messages':         return const PharmaceuticalsMessagesPage();
+      case 'CRD':              return const ClinicalReasoningDashboard();
       case 'Dashboard':
       default:                 return const PharmaceuticalsDashboardPage();
     }
