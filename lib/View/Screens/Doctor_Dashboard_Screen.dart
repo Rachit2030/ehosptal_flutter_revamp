@@ -217,8 +217,12 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
           TextButton.icon(
             onPressed: () {
-              if (isDrawer) Navigator.pop(context); // close drawer
-              Navigator.pop(context); // back (adjust if you want logout nav)
+              if (isDrawer) Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginScreen()),
+              (route) => false,
+            );
             },
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),

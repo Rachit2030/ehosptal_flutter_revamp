@@ -116,7 +116,7 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
               },
             ),
           const Spacer(),
-          TextButton.icon(
+            TextButton.icon(
             onPressed: () {
               if (isDrawer) Navigator.pop(context);
               Navigator.pushAndRemoveUntil(

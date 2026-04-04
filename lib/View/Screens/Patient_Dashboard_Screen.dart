@@ -255,7 +255,11 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
           TextButton.icon(
             onPressed: () {
               if (isDrawer) Navigator.pop(context);
-              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             },
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),
