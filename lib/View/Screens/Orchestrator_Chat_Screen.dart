@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
 import 'package:ehosptal_flutter_revamp/Service/session_storage.dart';
 
+import 'package:ehosptal_flutter_revamp/Service/stt_service.dart';
+import 'package:ehosptal_flutter_revamp/View/Widgets/voice_input_button.dart';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class OrchestratorChatScreen extends StatefulWidget {
   final String doctorId;
 
@@ -19,6 +24,7 @@ class OrchestratorChatScreen extends StatefulWidget {
 class _OrchestratorChatScreenState extends State<OrchestratorChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late final SttService _sttService;
 
   static const String _sessionKeyPrefix = "orchestrator_chat_v2_";
 
@@ -37,11 +43,12 @@ class _OrchestratorChatScreenState extends State<OrchestratorChatScreen> {
   bool get _isCompact => MediaQuery.of(context).size.width < 700;
   double get _pagePadding => _isCompact ? 12 : 24;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSessionHistory();
-  }
+@override
+void initState() {
+  super.initState();
+  _sttService = SttService(apiKey: dotenv.env['OPENAI_API_KEY'] ?? '');
+  _loadSessionHistory();
+}
 
   @override
   void dispose() {
@@ -50,9 +57,9 @@ class _OrchestratorChatScreenState extends State<OrchestratorChatScreen> {
     super.dispose();
   }
 
-  Future<void> _sendMessage() async {
-    final text = _messageController.text.trim();
-    if (text.isEmpty || _isSending) return;
+Future<void> _sendMessage([String? overrideText]) async {
+  final text = (overrideText ?? _messageController.text).trim(); // 👈
+  if (text.isEmpty || _isSending) return;
 
     setState(() {
       _messages.add(
@@ -394,14 +401,23 @@ class _OrchestratorChatScreenState extends State<OrchestratorChatScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 8),
+                                // 👇 only new widget
+                                VoiceInputButton(
+                                  sttService: _sttService,
+                                  textController: _messageController,
+                                  onTranscribed: (transcript) {
+                                    _sendMessage(transcript); // 👈 pass directly, skip the controller
+                                  },
+                                ),
+                                const SizedBox(width: 8),
                                 SizedBox(
                                   height: 52,
                                   width: 52,
                                   child: ElevatedButton(
-                                    onPressed: _isSending ? null : _sendMessage,
+                                    onPressed: _isSending ? null : () => _sendMessage(),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: primary,
+                                      backgroundColor: const Color(0xFF1F6F8B),
                                       foregroundColor: Colors.white,
                                       elevation: 0,
                                       shape: RoundedRectangleBorder(
