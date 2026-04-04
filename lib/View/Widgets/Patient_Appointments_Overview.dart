@@ -129,7 +129,7 @@ class _PatientAppointmentsOverviewState extends State<PatientAppointmentsOvervie
       builder: (_) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
-          width: 420,
+          constraints: BoxConstraints(maxWidth: 420),
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -293,15 +293,20 @@ class _PatientAppointmentsOverviewState extends State<PatientAppointmentsOvervie
         ...top2.map((item) => _appointmentTile(item)),
  
       const SizedBox(height: 6),
-      Row(children: [
-        TextButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.add_circle_outline),
-          label: const Text("Book New Appointments"),
-        ),
-        const Spacer(),
-        TextButton(onPressed: () {}, child: const Text("View All Appointments  >")),
-      ]),
+      Wrap(
+  alignment: WrapAlignment.spaceBetween,
+  children: [
+    TextButton.icon(
+      onPressed: () {},
+      icon: const Icon(Icons.add_circle_outline),
+      label: const Text("Book New Appointments"),
+    ),
+    TextButton(
+      onPressed: () {},
+      child: const Text("View All Appointments  >"),
+    ),
+  ],
+),
  
       const Divider(height: 26),
  

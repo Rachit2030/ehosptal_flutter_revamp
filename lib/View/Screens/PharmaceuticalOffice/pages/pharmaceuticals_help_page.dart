@@ -150,7 +150,7 @@ class _PharmaceuticalsHelpPageState extends State<PharmaceuticalsHelpPage> {
                       ),
                       const SizedBox(height: 24),
                       SizedBox(
-                        width: 180,
+                        width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
                           onPressed: _handleSubmit,

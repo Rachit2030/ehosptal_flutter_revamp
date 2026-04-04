@@ -204,7 +204,10 @@ class _NewInventoryDialog extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Container(
-        width: 460,
+        constraints: BoxConstraints(
+          maxWidth: 460,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         padding: const EdgeInsets.all(24),
         child: Stack(
           children: [

@@ -96,11 +96,14 @@ class DashboardSummaryCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'last 7 days',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
+                    const Flexible(
+                      child: Text(
+                        'last 7 days',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],

@@ -79,15 +79,65 @@ class PharmaceuticalsDashboardPage extends StatelessWidget {
                         children: [
                           const DashboardWelcomeCard(),
                           const SizedBox(height: 20),
-                          Row(
+                          LayoutBuilder(builder: (context, constraints) {
+                          if (constraints.maxWidth < 500) {
+                            return Column(
+                              children: [
+                                DashboardSummaryCard(
+                                  title: 'Clinical Trial',
+                                  total: 15,
+                                  percent: 0,
+                                  onTap: () => _openClinicalTrialList(context),
+                                ),
+                                const SizedBox(height: 12),
+                                DashboardSummaryCard(
+                                  title: 'Patients',
+                                  total: 4,
+                                  percent: 0,
+                                  onTap: () {},
+                                ),
+                                const SizedBox(height: 12),
+                                DashboardSummaryCard(
+                                  title: 'Doctors',
+                                  total: 5,
+                                  percent: 0,
+                                  onTap: () {},
+                                ),
+                              ],
+                            );
+                          }
+                          return Row(
                             children: [
-                              Expanded(child: DashboardSummaryCard(title: 'Clinical Trial', total: 15, percent: 0, onTap: () => _openClinicalTrialList(context))),
+                              Expanded(
+                                child: DashboardSummaryCard(
+                                  title: 'Clinical Trial',
+                                  total: 15,
+                                  percent: 0,
+                                  onTap: () => _openClinicalTrialList(context),
+                                ),
+                              ),
                               const SizedBox(width: 20),
-                              Expanded(child: DashboardSummaryCard(title: 'Patients', total: 4, percent: 0, onTap: () {})),
+                              Expanded(
+                                child: DashboardSummaryCard(
+                                  title: 'Patients',
+                                  total: 4,
+                                  percent: 0,
+                                  onTap: () {},
+                                ),
+                              ),
                               const SizedBox(width: 20),
-                              Expanded(child: DashboardSummaryCard(title: 'Doctors', total: 5, percent: 0, onTap: () {})),
+                              Expanded(
+                                child: DashboardSummaryCard(
+                                  title: 'Doctors',
+                                  total: 5,
+                                  percent: 0,
+                                  onTap: () {},
+                                ),
+                              ),
                             ],
-                          ),
+                          );
+                        },
+                      ),
                           const SizedBox(height: 20),
                           DashboardPatientSourceCard(data: patientSource),
                         ],

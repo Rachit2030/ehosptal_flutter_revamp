@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:ehosptal_flutter_revamp/model/patient.dart';
+import 'package:ehosptal_flutter_revamp/model/message_models.dart';
 
 class ApiService {
   static const String baseUrl =
@@ -282,5 +283,136 @@ class ApiService {
     } catch (_) {
       throw Exception("Failed to decode JSON. Raw response: $body");
     }
+  }
+
+  // ─────────────────────────── ORCHESTRATOR ─────────────────────────────────
+
+  Future<String> orchestrate({
+    required String id,
+    required String message,
+  }) async {
+    final url = Uri.parse("http://15.222.187.122/orchestrator/api/orchestrate");
+    const orchestratorTimeout = Duration(minutes: 5);
+    final request = http.Request("POST", url);
+    request.headers.addAll(_headers);
+    request.body = jsonEncode({"id": id, "message": message});
+    final streamed = await request.send().timeout(orchestratorTimeout);
+    final response = await http.Response.fromStream(streamed);
+    _ensureSuccess(response, "orchestrate failed");
+    return response.body;
+  }
+
+  Future<String> orchestratorChat({required String message}) async {
+    final url = Uri.parse("http://15.222.187.122/orchestrator/api/chat");
+    const orchestratorTimeout = Duration(minutes: 5);
+    final request = http.Request("POST", url);
+    request.headers.addAll({
+      "sec-ch-ua-platform": "\"Windows\"",
+      "Referer": "",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Chromium\";v=\"146\", \"Not-A.Brand\";v=\"24\", \"Google Chrome\";v=\"146\"",
+      "sec-ch-ua-mobile": "?0",
+      "Content-Type": "application/json",
+    });
+    request.body = jsonEncode({"message": message});
+    final streamed = await request.send().timeout(orchestratorTimeout);
+    final response = await http.Response.fromStream(streamed);
+    _ensureSuccess(response, "orchestratorChat failed");
+    return response.body;
+  }
+
+  // ─────────────────────────── DOCTOR MESSAGES ──────────────────────────────
+
+  /// Fetch all conversations for a doctor or patient, categorized by type.
+  /// Returns typed MessageConversation objects used by MessagesScreen.
+  Future<Map<String, List<MessageConversation>>> getMessagesByTypeAndId({
+    required dynamic userId,
+    required String userType,
+  }) async {
+    final url = Uri.parse("$baseUrl/api/users/getMessagesByTypeAndId");
+
+    Future<http.Response> postPayload(Map<String, dynamic> payload) async {
+      return http.post(url, headers: _headers, body: jsonEncode(payload))
+          .timeout(_timeout);
+    }
+
+    http.Response response = await postPayload({
+      "user_id": userId, "user_type": userType,
+    });
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      response = await postPayload({"doctorId": userId, "userType": userType});
+    }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      response = await postPayload({"user_id": userId, "userType": userType});
+    }
+
+    _ensureSuccess(response, "getMessagesByTypeAndId failed");
+    final decoded = _decodeJson(response.body);
+
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception("Unexpected messages response: ${response.body}");
+    }
+    final rawResult = decoded["result"];
+    if (rawResult is! Map<String, dynamic>) {
+      throw Exception("Unexpected messages result format: ${response.body}");
+    }
+
+    final result = <String, List<MessageConversation>>{};
+    rawResult.forEach((category, rawList) {
+      if (rawList is List) {
+        result[category] = rawList.whereType<Map>().map((e) =>
+            MessageConversation.fromJson(Map<String, dynamic>.from(e),
+                category: category)).toList();
+      } else {
+        result[category] = const [];
+      }
+    });
+    return result;
+  }
+
+  Future<int> messageSend({required Map<String, dynamic> payload}) async {
+    final url = Uri.parse("$baseUrl/api/users/MessageSend");
+    final response = await http.post(url, headers: _headers,
+        body: jsonEncode(payload)).timeout(_timeout);
+    _ensureSuccess(response, "MessageSend failed");
+    final decoded = _decodeJson(response.body);
+    if (decoded is int) return decoded;
+    if (decoded is num) return decoded.toInt();
+    if (decoded is Map<String, dynamic>) {
+      final value = decoded["result"] ?? decoded["success"] ?? decoded["data"];
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? 0;
+    }
+    if (decoded is String) return int.tryParse(decoded) ?? 0;
+    return 0;
+  }
+
+  Future<void> messageReadStatusUpdate({required List<int> messageIds}) async {
+    if (messageIds.isEmpty) return;
+    final url = Uri.parse("$baseUrl/api/users/MessageReadStatusUpdate");
+    final response = await http.post(url, headers: _headers,
+        body: jsonEncode({"messageIds": messageIds})).timeout(_timeout);
+    _ensureSuccess(response, "MessageReadStatusUpdate failed");
+  }
+
+  Future<List<Map<String, dynamic>>> findClinicStaffsByDoctorId({
+    required dynamic doctorId,
+  }) async {
+    final url = Uri.parse("$baseUrl/findClinicStaffsByDoctorId");
+    final response = await http.post(url, headers: _headers,
+        body: jsonEncode({"doctorId": doctorId})).timeout(_timeout);
+    _ensureSuccess(response, "findClinicStaffsByDoctorId failed");
+    final decoded = _decodeJson(response.body);
+    if (decoded is List) {
+      return decoded.whereType<Map>().map((e) =>
+          Map<String, dynamic>.from(e)).toList();
+    }
+    if (decoded is Map<String, dynamic>) {
+      final list = decoded["result"] ?? decoded["data"];
+      if (list is List) return list.whereType<Map>().map((e) =>
+          Map<String, dynamic>.from(e)).toList();
+    }
+    throw Exception("Unexpected clinic staff response: ${response.body}");
   }
 }

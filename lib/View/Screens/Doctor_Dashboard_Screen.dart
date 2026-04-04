@@ -1,10 +1,14 @@
 import 'package:ehosptal_flutter_revamp/View/Screens/Patient_List_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Orchestrator_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Orchestrator_Chat_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Messages_Screen.dart';
 import 'package:ehosptal_flutter_revamp/View/Widgets/Appointments_Section.dart';
 import 'package:ehosptal_flutter_revamp/View/Widgets/Tasks_Section.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Calendar_Screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ehosptal_flutter_revamp/View/Screens/Billing_Screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Login_Screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> doctor;
@@ -78,7 +82,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     if (selectedIndex == 0) {
       return _dashboardContent(isMobile: true);
     } else if (selectedIndex == 1) {
-      return PatientListScreen(    
+      return PatientListScreen(
         doctorId: widget.doctor["id"],
         embedded: true,
       );
@@ -86,6 +90,12 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
       return CalendarScreen(doctorId: widget.doctor['id'].toString());
     } else if (selectedIndex == 3) {
       return BillingScreen(doctorId: widget.doctor['id'].toString());
+    } else if (selectedIndex == 4) {
+      return MessagesScreen(doctor: widget.doctor);
+    } else if (selectedIndex == 5) {
+      return OrchestratorScreen(doctorId: widget.doctor['id'].toString());
+    } else if (selectedIndex == 6) {
+      return OrchestratorChatScreen(doctorId: widget.doctor['id'].toString());
     } else {
       return const Center(child: Text("Coming Soon"));
     }
@@ -200,13 +210,19 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
           _menuItem(Icons.calendar_today, "Calendar", 2, isDrawer),
           _menuItem(Icons.receipt_long, "Billing", 3, isDrawer),
           _menuItem(Icons.message, "Messages", 4, isDrawer),
+          _menuItem(Icons.smart_toy_outlined, "Clinical Analysis", 5, isDrawer),
+          _menuItem(Icons.smart_toy_outlined, "Orchestrator Chat", 6, isDrawer),
 
           const Spacer(),
 
           TextButton.icon(
             onPressed: () {
               if (isDrawer) Navigator.pop(context); // close drawer
-              Navigator.pop(context); // back (adjust if you want logout nav)
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             },
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),

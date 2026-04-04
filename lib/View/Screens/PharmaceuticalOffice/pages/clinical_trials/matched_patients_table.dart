@@ -218,8 +218,10 @@ class _MatchedPatientsTableState extends State<MatchedPatientsTable> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Container(
-                width: 620,
-                constraints: const BoxConstraints(minHeight: 600),
+                constraints: BoxConstraints(
+                  maxWidth: 620,
+                  maxHeight: MediaQuery.of(context).size.height * 0.85,
+                ),
                 padding: const EdgeInsets.all(22),
                 child: SingleChildScrollView(
                   child: Column(

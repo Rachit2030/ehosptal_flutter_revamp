@@ -138,7 +138,10 @@ class _PatientHealthSummaryState extends State<PatientHealthSummary> {
       builder: (_) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
-          width: 400,
+          constraints: BoxConstraints(
+          maxWidth: 420,
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -209,8 +212,10 @@ class _PatientHealthSummaryState extends State<PatientHealthSummary> {
         builder: (ctx, setS) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
-            width: 420,
-            constraints: const BoxConstraints(maxHeight: 600),
+            constraints: BoxConstraints(
+              maxWidth: 420,
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -318,7 +323,10 @@ class _PatientHealthSummaryState extends State<PatientHealthSummary> {
       builder: (_) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
-          width: 400,
+          constraints: BoxConstraints(
+            maxWidth: 420,
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -362,7 +370,9 @@ class _PatientHealthSummaryState extends State<PatientHealthSummary> {
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Icon(icon, size: 16, color: _primary),
         const SizedBox(width: 10),
-        SizedBox(width: 100, child: Text(label,
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 80, maxWidth: 120),
+              child: Text(label,
             style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600))),
         Expanded(child: Text(value,
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),

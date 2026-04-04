@@ -63,6 +63,8 @@ class _MyHealthScreenState extends State<MyHealthScreen>
               const SizedBox(height: 16),
               TabBar(
                 controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
                 labelColor: _primary,
                 unselectedLabelColor: Colors.grey[600],
                 indicatorColor: _primary,
