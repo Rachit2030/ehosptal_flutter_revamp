@@ -88,16 +88,6 @@ class _TasksSectionState extends State<TasksSection> {
                         color: Color(0xFF111827),
                       ),
                     ),
-                    const Spacer(),
-                    Container(
-                      height: 28,
-                      width: 28,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: primary, width: 1.4),
-                      ),
-                      child: const Icon(Icons.add, size: 18, color: primary),
-                    )
                   ],
                 ),
 
@@ -142,7 +132,6 @@ class _TasksSectionState extends State<TasksSection> {
                         title: t["title"] as String,
                         time: t["time"] as String,
                         checked: t["done"] as bool,
-                        flagColor: t["flagColor"] as Color,
                         onToggle: () {
                           setState(() => t["done"] = !(t["done"] as bool));
                         },
@@ -252,14 +241,12 @@ class _TaskRow extends StatelessWidget {
   final String title;
   final String time;
   final bool checked;
-  final Color flagColor;
   final VoidCallback onToggle;
 
   const _TaskRow({
     required this.title,
     required this.time,
     required this.checked,
-    required this.flagColor,
     required this.onToggle,
   });
 
@@ -319,11 +306,6 @@ class _TaskRow extends StatelessWidget {
           ),
 
           const SizedBox(width: 12),
-
-          // Flag + dots
-          Icon(Icons.outlined_flag, color: flagColor, size: 20),
-          const SizedBox(width: 10),
-          const Icon(Icons.more_horiz, color: Colors.black54, size: 20),
         ],
       ),
     );

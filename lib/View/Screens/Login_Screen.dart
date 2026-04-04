@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:ehosptal_flutter_revamp/Service/API_service.dart';
-import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_screen.dart';
+import 'package:ehosptal_flutter_revamp/View/Screens/Doctor_Dashboard_Screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -93,8 +91,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: (!kIsWeb ) ? MainAxisAlignment.center: MainAxisAlignment.start,
                     children: [
-                      SvgPicture.asset(
-  "assets/ehospital_logo.svg",
+                      Image.asset(
+  "assets/ehospital_logo.png",
   height: 72,
   // width: 64,
 ),
@@ -441,30 +439,6 @@ class _LoginCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 14),
-
-              // Bottom row: Sign up
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Don’t have an account? ",
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      // TODO: navigate to signup
-                    },
-                    child: Text(
-                      "Sign up",
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
