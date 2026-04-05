@@ -228,8 +228,8 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
         children: [
           const SizedBox(height: 20),
           Center(
-            child: SvgPicture.asset(
-              "assets/ehospital_logo.svg",
+            child: Image.asset(
+              "assets/ehospital_logo.png",
               height: 54,
               fit: BoxFit.contain,
             ),
@@ -251,7 +251,13 @@ class _PatientDashboardScreenState extends State<PatientDashboardScreen> {
               children: const [
                 Icon(Icons.chat_bubble_outline, size: 18, color: Colors.black45),
                 SizedBox(width: 8),
-                Text("Feedback", style: TextStyle(color: Colors.black45)),
+                Flexible(
+                  child: Text(
+                    "Feedback",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.black45),
+                  ),
+                ),
               ],
             ),
           ),

@@ -98,7 +98,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     } else if (selectedIndex == 6) {
       return OrchestratorChatScreen(doctorId: widget.doctor['id'].toString());
     } else if (selectedIndex == 7) {
-  return const ClinicalReasoningDashboard();
+      return const ClinicalReasoningDashboard();
     } else {
       return const Center(child: Text("Coming Soon"));
     }
@@ -200,8 +200,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         children: [
           const SizedBox(height: 20),
           Center(
-            child: SvgPicture.asset(
-              "assets/ehospital_logo.svg",
+            child: Image.asset(
+              "assets/ehospital_logo.png",
               height: 54,
               fit: BoxFit.contain,
             ),
@@ -223,10 +223,10 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             onPressed: () {
               if (isDrawer) Navigator.pop(context);
               Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-              (route) => false,
-            );
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
             },
             icon: const Icon(Icons.logout),
             label: const Text("Logout"),

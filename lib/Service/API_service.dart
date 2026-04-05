@@ -34,7 +34,10 @@ class ApiService {
     if (doctorId == null) throw Exception("doctorId is null.");
     final url = Uri.parse("$baseUrl/DoctorPatientsAuthorized");
     final response = await http
-        .post(url, headers: _headers, body: jsonEncode({"doctorId": doctorId}))
+        .post(url, headers: _headers, body: jsonEncode({
+          "doctorId": doctorId,
+          "doctor_id": doctorId,
+        }))
         .timeout(_timeout);
     _ensureSuccess(response, "getDoctorPatientsAuthorized failed");
     final decoded = _decodeJson(response.body);
@@ -97,67 +100,6 @@ class ApiService {
     if (decoded is Map<String, dynamic>) return decoded;
     throw Exception("Unexpected response format: ${res.body}");
   }
-
-  /// GET all doctors for booking → /api/appointments/getDoctors
-/// Returns: [ { id, name, specialty }, ... ]
-Future<List<Map<String, dynamic>>> getAvailableDoctorsForBooking() async {
-  final url = Uri.parse("$baseUrl/api/appointments/getDoctors");
-  final res = await http.post(url, headers: _headers, body: jsonEncode({})).timeout(_timeout);
-  _ensureSuccess(res, "getDoctors failed");
-  final decoded = _decodeJson(res.body);
-  if (decoded is Map<String, dynamic>) {
-    final list = decoded['result'];
-    if (list is List) return list.whereType<Map<String, dynamic>>().toList();
-  }
-  return [];
-}
-
-/// GET available slots for booking → /api/appointments/patientGetCalendar
-Future<List<Map<String, dynamic>>> getPatientAvailableSlots({
-  required dynamic patientId,
-  required DateTime start,
-  required DateTime end,
-}) async {
-  final url = Uri.parse("$baseUrl/api/appointments/patientGetCalendar");
-  final res = await http.post(url, headers: _headers, body: jsonEncode({
-    'loginData': {'id': patientId},
-    'start': start.toUtc().toIso8601String(),
-    'end': end.toUtc().toIso8601String(),
-  })).timeout(_timeout);
-  _ensureSuccess(res, "patientGetCalendar failed");
-  final decoded = _decodeJson(res.body);
-  if (decoded is Map<String, dynamic>) {
-    final list = decoded['result'];
-    if (list is List) return list.whereType<Map<String, dynamic>>().toList();
-  }
-  return [];
-}
-
-/// Book an appointment → /api/appointments/patientBookTime
-Future<void> bookAppointment({
-  required dynamic patientId,
-  required dynamic slotId,
-}) async {
-  final url = Uri.parse("$baseUrl/api/appointments/patientBookTime");
-  final res = await http.post(url, headers: _headers, body: jsonEncode({
-    'loginData': {'id': patientId},
-    'id': slotId,
-  })).timeout(_timeout);
-  _ensureSuccess(res, "patientBookTime failed");
-}
-
-/// Cancel an appointment → /api/appointments/cancelAppointmentRequest  
-Future<void> cancelAppointment({
-  required dynamic patientId,
-  required dynamic appointmentId,
-}) async {
-  final url = Uri.parse("$baseUrl/api/appointments/cancelAppointmentRequest");
-  final res = await http.post(url, headers: _headers, body: jsonEncode({
-    'loginData': {'id': patientId},
-    'id': appointmentId,
-  })).timeout(_timeout);
-  _ensureSuccess(res, "cancelAppointmentRequest failed");
-}
 
   // prescription table: medicine_name, dosage, start_date, end_date, status
   // prescription_form table: medication_name, medication_strength, dosage_instructions

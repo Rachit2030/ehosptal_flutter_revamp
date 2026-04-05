@@ -34,22 +34,21 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
     ('Inventory',     Icons.inventory_2_outlined),
     ('Prescriptions', Icons.description_outlined),
     ('Help',          Icons.help_outline_rounded),
-    ('CRD', Icons.hub_outlined),
+    ('CRD',           Icons.hub_outlined),
   ];
 
   Widget _buildPage() {
     switch (selectedKey) {
-      case 'Management':       return const PharmaceuticalsManagementPage();
-      case 'Help':             return const PharmaceuticalsHelpPage();
-      case 'Orchestrator':     return const _OrchestratorPlaceholderPage();
-      case 'Inventory':        return const PharmaceuticalsInventoryPage();
+      case 'Management':         return const PharmaceuticalsManagementPage();
+      case 'Help':               return const PharmaceuticalsHelpPage();
+      case 'CRD':                return const ClinicalReasoningDashboard();
+      case 'Inventory':          return const PharmaceuticalsInventoryPage();
       case 'Prescriptions':    return const PharmaceuticalsPrescriptionsPage();
       case 'View':             return const PharmaceuticalsProfileViewPage();
       case 'Clinical Trial Add': return const PharmaceuticalsClinicalTrialAddPage();
       case 'Specific Trial':   return const PharmaceuticalsSpecificTrialPage();
       case 'Clinical Trial':   return const PharmaceuticalsClinicalTrialPage();
       case 'Messages':         return const PharmaceuticalsMessagesPage();
-      case 'CRD':              return const ClinicalReasoningDashboard();
       case 'Dashboard':
       default:                 return const PharmaceuticalsDashboardPage();
     }
@@ -68,7 +67,7 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
                   backgroundColor: Colors.white,
                   elevation: 0,
                   iconTheme: const IconThemeData(color: _primary),
-                  title: SvgPicture.asset('assets/ehospital_logo.svg', height: 36),
+                  title: Image.asset('assets/ehospital_logo.png', height: 36, fit: BoxFit.contain),
                 )
               : null,
           drawer: isMobile ? _buildSidebar(isDrawer: true) : null,
@@ -101,25 +100,33 @@ class _PharmaOfficeShellState extends State<PharmaOfficeShell> {
         children: [
           const SizedBox(height: 20),
           Center(
-            child: SvgPicture.asset(
-              'assets/ehospital_logo.svg',
+            child: Image.asset(
+              'assets/ehospital_logo.png',
               height: 54,
               fit: BoxFit.contain,
             ),
           ),
           const SizedBox(height: 30),
-          for (final (label, icon) in _pages)
-            _MenuItem(
-              icon: icon,
-              label: label,
-              selected: selectedKey == label,
-              onTap: () {
-                setState(() => selectedKey = label);
-                if (isDrawer) Navigator.pop(context);
-              },
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (final (label, icon) in _pages)
+                    _MenuItem(
+                      icon: icon,
+                      label: label,
+                      selected: selectedKey == label,
+                      onTap: () {
+                        setState(() => selectedKey = label);
+                        if (isDrawer) Navigator.pop(context);
+                      },
+                    ),
+                ],
+              ),
             ),
-          const Spacer(),
-            TextButton.icon(
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
             onPressed: () {
               if (isDrawer) Navigator.pop(context);
               Navigator.pushAndRemoveUntil(
@@ -176,20 +183,6 @@ class _TopBar extends StatelessWidget {
           const SizedBox(width: 10),
           const Icon(Icons.person_outline, color: Colors.black54),
         ],
-      ),
-    );
-  }
-}
-
-class _OrchestratorPlaceholderPage extends StatelessWidget {
-  const _OrchestratorPlaceholderPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Orchestrator',
-        style: TextStyle(fontSize: 24, color: _primary, fontWeight: FontWeight.w600),
       ),
     );
   }
